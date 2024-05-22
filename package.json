@@ -1,0 +1,18 @@
+{
+  "name": "com.outsystems.plugins.inappbrowser",
+  "version": "1.0.0",
+  "description": "InAppBrowser OutSystems Cordova Plugin",
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "cordova": {
+    "id": "com.outsystems.plugins.inappbrowser",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "engines": []
+}
