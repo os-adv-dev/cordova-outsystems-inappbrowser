@@ -23,8 +23,7 @@ function openInSystemBrowser(url: string, options: SystemBrowserOptions, success
 }
 
 function openInExternalBrowser(url: string, success: () => void, error: (error: PluginError) => void): void {
-  console.log("open in external browser view...");
-  exec(success, error, 'OSInAppBrowser', 'coolMethod', [{url}])
+  exec(success, error, 'OSInAppBrowser', 'openInExternalBrowser', [{url}])
 }
 function close(): void {
   console.log("close view...");

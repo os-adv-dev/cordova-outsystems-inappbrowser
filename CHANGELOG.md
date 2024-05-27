@@ -8,4 +8,7 @@ The changes documented here do not include those from the original repository.
 
 ## [1.0.0]
 
-- Feat: [Bridge] Adds cordova bridge, with types (https://outsystemsrd.atlassian.net/browse/RMET-3419).
+### Features
+
+- Add `OpenInExternalBrowser` on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3421).
+- [Bridge] Adds cordova bridge, with types (https://outsystemsrd.atlassian.net/browse/RMET-3419).

@@ -100,8 +100,7 @@ function openInSystemBrowser(url, options, success, error, browserCallbacks) {
   exec(success, error, "OSInAppBrowser", "coolMethod", [{ url, options, browserCallbacks }]);
 }
 function openInExternalBrowser(url, success, error) {
-  console.log("open in external browser view...");
-  exec(success, error, "OSInAppBrowser", "coolMethod", [{ url }]);
+  exec(success, error, "OSInAppBrowser", "openInExternalBrowser", [{ url }]);
 }
 function close() {
   console.log("close view...");
