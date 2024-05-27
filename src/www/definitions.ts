@@ -35,15 +35,14 @@ export type PluginError = {
   code: string,
   message: string
 }
-export interface CommonOptions {
+
+export interface WebViewOptions {
+  showURL: boolean;
+  showToolbar: boolean;
+
   clearCache: boolean;
   clearSessionCache: boolean;
   mediaPlaybackRequiresUserAction: boolean;
-}
-
-export interface WebViewOptions extends CommonOptions {
-  showURL: boolean;
-  showToolbar: boolean;
   
   closeButtonText: string;
   toolbarPosition: ToolbarPosition;
@@ -80,7 +79,7 @@ export enum DismissStyle {
 }
 
 
-export interface SystemBrowserOptions extends CommonOptions {
+export interface SystemBrowserOptions {
   android: AndroidSystemBrowserOptions,
   iOS: iOSSystemBrowserOptions
 }

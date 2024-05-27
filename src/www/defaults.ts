@@ -56,8 +56,5 @@ export const DefaultAndroidSystemBrowserOptions: AndroidSystemBrowserOptions = {
    
 export const DefaultSystemBrowserOptions: SystemBrowserOptions = {
     android: DefaultAndroidSystemBrowserOptions,
-    iOS: DefaultiOSSystemBrowserOptions,
-    clearCache: false,
-    clearSessionCache: false,
-    mediaPlaybackRequiresUserAction: false
+    iOS: DefaultiOSSystemBrowserOptions
 }
