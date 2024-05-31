@@ -40,23 +40,16 @@ class OSInAppBrowser: CordovaImplementation() {
         try {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
-            val argumentsModel = OSInAppBrowserInputArgumentsModel(url)
 
-            val success = engine?.openExternalBrowser(argumentsModel.url) ?: false
+            val success = engine?.openExternalBrowser(url) ?: false
             if (success) {
                 sendPluginResult("success", null)
             } else {
-                sendPluginResult(null, Pair(
-                    OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.code.toString(),
-                    OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.message)
-                )
+                sendPluginResult(null, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.toPair())
             }
         }
         catch (e: Exception) {
-            sendPluginResult(null, Pair(
-                OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.code.toString(),
-                OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.message)
-            )
+            sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.toPair())
         }
     }
 
@@ -77,18 +70,11 @@ class OSInAppBrowser: CordovaImplementation() {
         val status = googleApiAvailability.isGooglePlayServicesAvailable(getActivity())
 
         if (status != ConnectionResult.SUCCESS) {
-            var result: Pair<String, String>? = null
-            result = if (googleApiAvailability.isUserResolvableError(status)) {
+            val result: Pair<String, String> = if (googleApiAvailability.isUserResolvableError(status)) {
                 googleApiAvailability.getErrorDialog(getActivity(), status, 1)?.show()
-                Pair(
-                    OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.code.toString(),
-                    OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.message
-                )
+                OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.toPair()
             } else {
-                Pair(
-                    OSInAppBrowserError.GOOGLE_SERVICES_ERROR.code.toString(),
-                    OSInAppBrowserError.GOOGLE_SERVICES_ERROR.message
-                )
+                OSInAppBrowserError.GOOGLE_SERVICES_ERROR.toPair()
             }
             sendPluginResult(null, result)
             return false
