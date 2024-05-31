@@ -1,16 +1,24 @@
-package com.outsystems.plugins.inappbrowser;
+package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CallbackContext;
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
+import com.outsystems.plugins.oscordova.CordovaImplementation
+import org.apache.cordova.CallbackContext
+import org.apache.cordova.CordovaInterface
+import org.apache.cordova.CordovaWebView
+import org.json.JSONArray
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-/**
- * This class echoes a string called from JavaScript.
- */
 class OSInAppBrowser: CordovaImplementation() {
+    override var callbackContext: CallbackContext? = null
+
+    private var engine: OSIABEngine? = null
+
+    override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
+        super.initialize(cordova, webView)
+        val router = OSExternalBrowserRouterAdapter(cordova.context)
+        this.engine = OSIABEngine(router)
+    }
 
     override fun execute(
         action: String,
@@ -18,17 +26,73 @@ class OSInAppBrowser: CordovaImplementation() {
         callbackContext: CallbackContext
     ): Boolean {
         this.callbackContext = callbackContext
-        val result = runBlocking {
-            when (action) {
-                "coolMethod" -> {
-                   //TODO
-                   return true
-                }
 
-                else -> return false
+        when(action) {
+            "openInExternalBrowser" -> {
+                openInExternalBrowser(args)
             }
-            true
         }
-        return result
+
+        return true
+    }
+
+    private fun openInExternalBrowser(args: JSONArray) {
+        try {
+            val argumentsDictionary = args.getJSONObject(0)
+            val url = argumentsDictionary.getString("url")
+            val argumentsModel = OSInAppBrowserInputArgumentsModel(url)
+
+            val success = engine?.openExternalBrowser(argumentsModel.url) ?: false
+            if (success) {
+                sendPluginResult("success", null)
+            } else {
+                sendPluginResult(null, Pair(
+                    OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.code.toString(),
+                    OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.message)
+                )
+            }
+        }
+        catch (e: Exception) {
+            sendPluginResult(null, Pair(
+                OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.code.toString(),
+                OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.message)
+            )
+        }
+    }
+
+    override fun onRequestPermissionResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        // Do nothing
+    }
+
+    override fun onResume(multitasking: Boolean) {
+        // Do nothing
+    }
+
+    override fun areGooglePlayServicesAvailable(): Boolean {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val status = googleApiAvailability.isGooglePlayServicesAvailable(getActivity())
+
+        if (status != ConnectionResult.SUCCESS) {
+            var result: Pair<String, String>? = null
+            result = if (googleApiAvailability.isUserResolvableError(status)) {
+                googleApiAvailability.getErrorDialog(getActivity(), status, 1)?.show()
+                Pair(
+                    OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.code.toString(),
+                    OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.message
+                )
+            } else {
+                Pair(
+                    OSInAppBrowserError.GOOGLE_SERVICES_ERROR.code.toString(),
+                    OSInAppBrowserError.GOOGLE_SERVICES_ERROR.message
+                )
+            }
+            sendPluginResult(null, result)
+            return false
+        }
+        return true
     }
 }
