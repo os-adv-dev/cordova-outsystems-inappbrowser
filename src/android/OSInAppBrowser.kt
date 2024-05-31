@@ -53,14 +53,6 @@ class OSInAppBrowser: CordovaImplementation() {
         }
     }
 
-    override fun onRequestPermissionResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        // Do nothing
-    }
-
     override fun onResume(multitasking: Boolean) {
         // Do nothing
     }
