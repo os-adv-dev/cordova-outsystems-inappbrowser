@@ -30,7 +30,6 @@
         <source-file src="src/ios/OSInAppBrowser.swift" />
         <source-file src="src/ios/OSInAppBrowserError.swift" />
         <source-file src="src/ios/OSInAppBrowserInputArgumentsModel.swift" />
-        <source-file src="src/ios/OSUIApplicationRouterAdapter.swift" />
 
         <framework src="src/ios/OSInAppBrowserLib.xcframework" embed="true" custom="true" />
     </platform>

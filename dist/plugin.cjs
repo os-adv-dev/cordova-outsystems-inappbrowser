@@ -36,6 +36,12 @@ var DismissStyle = /* @__PURE__ */ ((DismissStyle2) => {
   DismissStyle2[DismissStyle2["DONE"] = 2] = "DONE";
   return DismissStyle2;
 })(DismissStyle || {});
+var CallbackEvent = /* @__PURE__ */ ((CallbackEvent2) => {
+  CallbackEvent2[CallbackEvent2["SUCCESS"] = 0] = "SUCCESS";
+  CallbackEvent2[CallbackEvent2["PAGE_CLOSED"] = 1] = "PAGE_CLOSED";
+  CallbackEvent2[CallbackEvent2["PAGE_LOAD_COMPLETED"] = 2] = "PAGE_LOAD_COMPLETED";
+  return CallbackEvent2;
+})(CallbackEvent || {});
 const DefaultAndroidWebViewOptions = {
   allowZoom: false,
   hardwareBack: true,
@@ -46,27 +52,27 @@ const DefaultiOSWebViewOptions = {
   enableViewportScale: false,
   allowInLineMediaPlayback: false,
   keyboardDisplayRequiresUserAction: true,
-  surpressedIncrementalRendering: false,
+  surpressIncrementalRendering: false,
   viewStyle: iOSViewStyle.PAGE_SHEET,
   animation: iOSAnimation.FLIP_HORIZONTAL
 };
 const DefaultWebViewOptions = {
-  showToolBar: true,
+  showToolbar: true,
   showURL: false,
   clearCache: true,
   clearSessionCache: true,
   mediaPlaybackRequiresUserAction: false,
   closeButtonText: "Close",
   toolbarPosition: ToolbarPosition.TOP,
-  showNatigationButtons: true,
+  showNavigationButtons: true,
   leftToRight: false,
   android: DefaultAndroidWebViewOptions,
   iOS: DefaultiOSWebViewOptions
 };
 const DefaultiOSSystemBrowserOptions = {
-  closeButtonText: DismissStyle.CLOSE,
-  viewStyle: iOSViewStyle.PAGE_SHEET,
-  animationEffect: iOSAnimation.FLIP_HORIZONTAL,
+  closeButtonText: DismissStyle.DONE,
+  viewStyle: iOSViewStyle.FULL_SCREEN,
+  animationEffect: iOSAnimation.COVER_VERTICAL,
   enableBarsCollapsing: true,
   enableReadersMode: false
 };
@@ -75,16 +81,30 @@ const DefaultAndroidSystemBrowserOptions = {
   hideToolbarOnScroll: false,
   viewStyle: AndroidViewStyle.BOTTOM_SHEET,
   startAnimation: AndroidAnimation.FADE_IN,
-  exitAnimation: AndroidAnimation.FADE_IN
+  exitAnimation: AndroidAnimation.FADE_OUT
 };
 const DefaultSystemBrowserOptions = {
   android: DefaultAndroidSystemBrowserOptions,
-  iOS: DefaultiOSSystemBrowserOptions,
-  clearCache: false,
-  clearSessionCache: false,
-  mediaPlaybackRequiresUserAction: false
+  iOS: DefaultiOSSystemBrowserOptions
 };
 var exec = cordova.require("cordova/exec");
+function trigger(type, success, onbrowserClosed = void 0, onbrowserPageLoaded = void 0) {
+  switch (type) {
+    case CallbackEvent.SUCCESS:
+      success();
+      break;
+    case CallbackEvent.PAGE_CLOSED:
+      if (onbrowserClosed) {
+        onbrowserClosed();
+      }
+      break;
+    case CallbackEvent.PAGE_LOAD_COMPLETED:
+      if (onbrowserPageLoaded) {
+        onbrowserPageLoaded();
+      }
+      break;
+  }
+}
 function openInWebView(url, options, success, error, browserCallbacks) {
   options = options || DefaultWebViewOptions;
   console.log(`open in web view for url ${url}
@@ -95,11 +115,16 @@ function openInWebView(url, options, success, error, browserCallbacks) {
 }
 function openInSystemBrowser(url, options, success, error, browserCallbacks) {
   options = options || DefaultSystemBrowserOptions;
-  console.log(`open in system browser view for url ${url}
- with options: ${JSON.stringify(options)}`);
-  if (browserCallbacks)
-    console.log(`with browser callbacks ${JSON.stringify(browserCallbacks)}`);
-  exec(success, error, "OSInAppBrowser", "coolMethod", [{ url, options, browserCallbacks }]);
+  let triggerCorrectCallback = function(result) {
+    if (result) {
+      if (browserCallbacks) {
+        trigger(result, success, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
+      } else {
+        trigger(result, success);
+      }
+    }
+  };
+  exec(triggerCorrectCallback, error, "OSInAppBrowser", "openInSystemBrowser", [{ url, options }]);
 }
 function openInExternalBrowser(url, success, error) {
   exec(success, error, "OSInAppBrowser", "openInExternalBrowser", [{ url }]);
@@ -137,6 +162,7 @@ module.exports = {
 };
 exports.AndroidAnimation = AndroidAnimation;
 exports.AndroidViewStyle = AndroidViewStyle;
+exports.CallbackEvent = CallbackEvent;
 exports.DismissStyle = DismissStyle;
 exports.ToolbarPosition = ToolbarPosition;
 exports.iOSAnimation = iOSAnimation;
