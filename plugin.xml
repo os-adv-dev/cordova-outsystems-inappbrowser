@@ -8,6 +8,9 @@
         <clobbers target="cordova.plugins.OSInAppBrowser" />
     </js-module>
     <platform name="android">
+
+        <hook type="before_plugin_install" src="hooks/outsystems/handle_cleartextTrafficPermitted.js" />
+
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="OSInAppBrowser">
                 <param name="android-package" value="com.outsystems.plugins.inappbrowser.osinappbrowser.OSInAppBrowser" />
