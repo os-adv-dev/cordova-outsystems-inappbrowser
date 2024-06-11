@@ -1,6 +1,6 @@
-var fs = require('fs'),
-    path = require('path'),
-    configXmlParser = require('./config_xml_parser');
+const fs = require('fs');
+const path = require('path');
+const { ConfigParser } = require('cordova-common');
 
 const CORDOVA_PREFERENCE_NAME = 'InAppBrowserCleartextTrafficPermitted';
 const ANDROID_PREFERENCE_NAME = 'cleartextTrafficPermitted';
@@ -11,7 +11,7 @@ const ANDROID_PREFERENCE_NAME = 'cleartextTrafficPermitted';
  * @returns {boolean} true if the platform is Android
  */
 function isPlatformAndroid(context) {
-    var platform = context.opts.plugin.platform;
+    const platform = context.opts.plugin.platform;
     return platform === 'android';
 }
 
@@ -21,11 +21,10 @@ function isPlatformAndroid(context) {
  * @returns {boolean} true if the option should be enabled
  */
 function shouldEnableCleartextTrafficPermitted(context) {
-    var projectRoot = context.opts.projectRoot;
-    var configPath = path.join(projectRoot, 'config.xml');
-    var config = configXmlParser.getConfig(configPath);
-    var scope = configXmlParser.getAndroidPlatformScope(config);
-    var enable = configXmlParser.getPreferenceValue(scope, CORDOVA_PREFERENCE_NAME);
+    const projectRoot = context.opts.projectRoot;
+    const configXML = path.join(projectRoot, 'config.xml');
+    const configParser = new ConfigParser(configXML);
+    const enable = configParser.getPlatformPreference(CORDOVA_PREFERENCE_NAME, 'android');
     return enable === 'true' || enable === 'True';
 }
 
@@ -36,8 +35,8 @@ function shouldEnableCleartextTrafficPermitted(context) {
 function enableCleartextTrafficPermitted(context) {
     console.log('Enabling ' + ANDROID_PREFERENCE_NAME + ' option');
 
-    var projectRoot = context.opts.projectRoot;
-    var config = path.join(projectRoot, 'res', 'android', 'xml', 'network_security_config.xml');
+    const projectRoot = context.opts.projectRoot;
+    const config = path.join(projectRoot, 'res', 'android', 'xml', 'network_security_config.xml');
 
     if (fs.existsSync(config)) {
         fs.readFile(config, 'utf8', function (err, data) {
@@ -46,7 +45,7 @@ function enableCleartextTrafficPermitted(context) {
             }
 
             if (data.indexOf(ANDROID_PREFERENCE_NAME) == -1) {
-                var result = data.replace(/<base-config/g, '<base-config ' + ANDROID_PREFERENCE_NAME + '="true"');
+                const result = data.replace(/<base-config/g, '<base-config ' + ANDROID_PREFERENCE_NAME + '="true"');
 
                 fs.writeFile(config, result, 'utf8', function (err) {
                     if (err) {
