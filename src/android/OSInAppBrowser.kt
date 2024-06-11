@@ -3,6 +3,8 @@ package com.outsystems.plugins.inappbrowser.osinappbrowser
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.ApplicationContextAdapter
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABApplicationRouterAdapter
 import com.outsystems.plugins.oscordova.CordovaImplementation
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
@@ -16,7 +18,8 @@ class OSInAppBrowser: CordovaImplementation() {
 
     override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
         super.initialize(cordova, webView)
-        val router = OSExternalBrowserRouterAdapter(cordova.context)
+        val applicationDelegate = ApplicationContextAdapter(cordova.context)
+        val router = OSIABApplicationRouterAdapter(applicationDelegate)
         this.engine = OSIABEngine(router)
     }
 
@@ -41,11 +44,15 @@ class OSInAppBrowser: CordovaImplementation() {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
 
-            val success = engine?.openExternalBrowser(url) ?: false
-            if (success) {
-                sendPluginResult("success", null)
-            } else {
-                sendPluginResult(null, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.toPair())
+            engine?.openExternalBrowser(url) { success ->
+                if (success) {
+                    sendPluginResult("success", null)
+                } else {
+                    sendPluginResult(
+                        null,
+                        OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.toPair()
+                    )
+                }
             }
         }
         catch (e: Exception) {

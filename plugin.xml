@@ -19,9 +19,7 @@
         
         <config-file parent="/*" target="AndroidManifest.xml" />
         <source-file src="src/android/OSInAppBrowser.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
-        <source-file src="src/android/OSExternalBrowserRouterAdapter.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
         <source-file src="src/android/OSInAppBrowserError.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
-        <source-file src="src/android/OSInAppBrowserInputArgumentsModel.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
         <lib-file src="src/android/libs/OSInAppBrowserLib.aar" target="libs/OSInAppBrowserLib.aar" />
