@@ -10,7 +10,7 @@ function openInWebView(url: string, options: WebViewOptions,  success: () => voi
   if(browserCallbacks)
     console.log(`with browser callbacks ${JSON.stringify(browserCallbacks)}`)
 
-  exec(success, error, 'OSInAppBrowser', 'coolMethod', [{url, options, browserCallbacks}])
+  exec(success, error, 'OSInAppBrowser', 'openInWebView', [{url, options, browserCallbacks}])
 }
 
 function openInSystemBrowser(url: string, options: SystemBrowserOptions, success: () => void, error: (error: PluginError) => void, browserCallbacks?: BrowserCallbacks): void {
