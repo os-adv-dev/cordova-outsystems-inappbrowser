@@ -10,7 +10,9 @@ The changes documented here do not include those from the original repository.
 
 ### Features
 
+- Add `OpenInSystemBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3424).
 - Add `OpenInSystemBrowser`'s event listeners on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3429).
 - Add `OpenInSystemBrowser`'s features on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3423).
+- Add `OpenInExternalBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3422).
 - Add `OpenInExternalBrowser` on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3421).
 - [Bridge] Adds cordova bridge, with types (https://outsystemsrd.atlassian.net/browse/RMET-3419).
