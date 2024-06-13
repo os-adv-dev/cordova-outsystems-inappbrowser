@@ -19,6 +19,7 @@ allprojects {
 dependencies{
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 
+    implementation("androidx.browser:browser:1.8.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
