@@ -35,9 +35,9 @@ var DismissStyle = /* @__PURE__ */ ((DismissStyle2) => {
   return DismissStyle2;
 })(DismissStyle || {});
 var CallbackEvent = /* @__PURE__ */ ((CallbackEvent2) => {
-  CallbackEvent2[CallbackEvent2["SUCCESS"] = 0] = "SUCCESS";
-  CallbackEvent2[CallbackEvent2["PAGE_CLOSED"] = 1] = "PAGE_CLOSED";
-  CallbackEvent2[CallbackEvent2["PAGE_LOAD_COMPLETED"] = 2] = "PAGE_LOAD_COMPLETED";
+  CallbackEvent2[CallbackEvent2["SUCCESS"] = 1] = "SUCCESS";
+  CallbackEvent2[CallbackEvent2["PAGE_CLOSED"] = 2] = "PAGE_CLOSED";
+  CallbackEvent2[CallbackEvent2["PAGE_LOAD_COMPLETED"] = 3] = "PAGE_LOAD_COMPLETED";
   return CallbackEvent2;
 })(CallbackEvent || {});
 const DefaultAndroidWebViewOptions = {
@@ -49,14 +49,13 @@ const DefaultiOSWebViewOptions = {
   allowOverScroll: true,
   enableViewportScale: false,
   allowInLineMediaPlayback: false,
-  keyboardDisplayRequiresUserAction: true,
   surpressIncrementalRendering: false,
-  viewStyle: iOSViewStyle.PAGE_SHEET,
-  animation: iOSAnimation.FLIP_HORIZONTAL
+  viewStyle: iOSViewStyle.FULL_SCREEN,
+  animationEffect: iOSAnimation.COVER_VERTICAL
 };
 const DefaultWebViewOptions = {
   showToolbar: true,
-  showURL: false,
+  showURL: true,
   clearCache: true,
   clearSessionCache: true,
   mediaPlaybackRequiresUserAction: false,
@@ -105,11 +104,16 @@ function trigger(type, success, onbrowserClosed = void 0, onbrowserPageLoaded = 
 }
 function openInWebView(url, options, success, error, browserCallbacks) {
   options = options || DefaultWebViewOptions;
-  console.log(`open in web view for url ${url}
- with options: ${JSON.stringify(options)}`);
-  if (browserCallbacks)
-    console.log(`with browser callbacks ${JSON.stringify(browserCallbacks)}`);
-  exec(success, error, "OSInAppBrowser", "coolMethod", [{ url, options, browserCallbacks }]);
+  let triggerCorrectCallback = function(result) {
+    if (result) {
+      if (browserCallbacks) {
+        trigger(result, success, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
+      } else {
+        trigger(result, success);
+      }
+    }
+  };
+  exec(triggerCorrectCallback, error, "OSInAppBrowser", "openInWebView", [{ url, options }]);
 }
 function openInSystemBrowser(url, options, success, error, browserCallbacks) {
   options = options || DefaultSystemBrowserOptions;

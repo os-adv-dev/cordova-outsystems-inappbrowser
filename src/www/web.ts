@@ -24,12 +24,18 @@ function trigger(type: CallbackEvent, success: () => void, onbrowserClosed: (() 
 
 function openInWebView(url: string, options: WebViewOptions,  success: () => void, error: (error: PluginError) => void,  browserCallbacks?: BrowserCallbacks): void {
   options = options || DefaultWebViewOptions;
-  console.log(`open in web view for url ${url}\n with options: ${JSON.stringify(options)}`);
   
-  if(browserCallbacks)
-    console.log(`with browser callbacks ${JSON.stringify(browserCallbacks)}`)
+  let triggerCorrectCallback = function (result: CallbackEvent) {
+    if (result) {
+      if (browserCallbacks) {
+        trigger(result, success, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
+      } else {
+        trigger(result, success);
+      }
+    }
+  };
 
-  exec(success, error, 'OSInAppBrowser', 'coolMethod', [{url, options, browserCallbacks}])
+  exec(triggerCorrectCallback, error, 'OSInAppBrowser', 'openInWebView', [{url, options}]);
 }
 
 function openInSystemBrowser(url: string, options: SystemBrowserOptions, success: () => void, error: (error: PluginError) => void, browserCallbacks?: BrowserCallbacks): void {
@@ -45,7 +51,7 @@ function openInSystemBrowser(url: string, options: SystemBrowserOptions, success
     }
   };
 
-  exec(triggerCorrectCallback, error, 'OSInAppBrowser', 'openInSystemBrowser', [{url, options}])  
+  exec(triggerCorrectCallback, error, 'OSInAppBrowser', 'openInSystemBrowser', [{url, options}]);
 }
 
 function openInExternalBrowser(url: string, success: () => void, error: (error: PluginError) => void): void {
