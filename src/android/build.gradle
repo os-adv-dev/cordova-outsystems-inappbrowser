@@ -27,6 +27,9 @@ dependencies{
 
     // appcompact
     implementation "androidx.appcompat:appcompat:1.7.0"
+
+    //gson
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 android {
