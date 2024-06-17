@@ -81,9 +81,7 @@ class OSInAppBrowser: CordovaImplementation() {
             val arguments = args.getJSONObject(0)
             val url = arguments.getString("url")
 
-            val options = arguments.getString("options")
-            val webViewOptions = buildWebViewOptions(options)
-
+            val webViewOptions = buildWebViewOptions(arguments.getString("options"))
             if (webViewOptions == null) {
                 sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE.toPair())
                 return
@@ -131,7 +129,7 @@ class OSInAppBrowser: CordovaImplementation() {
 
     /**
      * Parses options that come in JSON to a 'OSInAppBrowserWebViewInputArguments'.
-     * Then, it uses the newly created object to create a 'OSIABWebViewOptions'.
+     * Then, it uses the newly created object to create a 'OSIABWebViewOptions' object.
      * @param options The options to open the URL in a WebView, in a JSON string.
      */
     private fun buildWebViewOptions(options: String): OSIABWebViewOptions? {
