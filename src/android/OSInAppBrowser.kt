@@ -97,7 +97,7 @@ class OSInAppBrowser: CordovaImplementation() {
             }
         }
         catch (e: Exception) {
-            sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.toPair())
+            sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE.toPair())
         }
     }
 
