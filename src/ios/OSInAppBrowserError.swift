@@ -1,28 +1,48 @@
 enum OSInAppBrowserTarget {
-    case openInExternalBrowser
+    case externalBrowser
+    case systemBrowser
+    case webView
 }
 
 enum OSInAppBrowserError: Error {
     case inputArgumentsIssue(target: OSInAppBrowserTarget)
-    case openExternalBrowserFailed(forURL: String)
+    case failedToOpen(url: String, onTarget: OSInAppBrowserTarget)
     
     private var code: Int {
-        var result: Int
+        let result: Int
         
         switch self {
         case .inputArgumentsIssue: result = 0
-        case .openExternalBrowserFailed: result = 0
+        case .failedToOpen: result = 0
         }
         
         return result
     }
     
     private var description: String {
-        var result: String
+        let result: String
         
         switch self {
-        case .inputArgumentsIssue: result = "The input parameters for 'openInExternalBrowser' are invalid."
-        case .openExternalBrowserFailed(let url): result = "Couldn't open '\(url)' using Safari."
+        case .inputArgumentsIssue(let target):             
+            let targetString: String
+            
+            switch target {
+            case .externalBrowser: targetString = "openInExternalBrowser"
+            case .systemBrowser: targetString = "openInSystemBrowser"
+            case .webView: targetString = "openInWebView"
+            }
+            
+            result = "The input parameters for '\(targetString)' are invalid."
+        case .failedToOpen(url: let url, onTarget: let target):
+            let targetString: String
+            
+            switch target {
+            case .externalBrowser: targetString = "Safari"
+            case .systemBrowser: targetString = "SFSafariViewController"
+            case .webView: targetString = "WebView"
+            }
+            
+            result = "Couldn't open '\(url)' using \(targetString)."
         }
         
         return result

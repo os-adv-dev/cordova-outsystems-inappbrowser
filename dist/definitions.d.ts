@@ -29,17 +29,15 @@ export type PluginError = {
     code: string;
     message: string;
 };
-export interface CommonOptions {
+export interface WebViewOptions {
+    showURL: boolean;
+    showToolbar: boolean;
     clearCache: boolean;
     clearSessionCache: boolean;
     mediaPlaybackRequiresUserAction: boolean;
-}
-export interface WebViewOptions extends CommonOptions {
-    showURL: boolean;
-    showToolBar: boolean;
     closeButtonText: string;
     toolbarPosition: ToolbarPosition;
-    showNatigationButtons: boolean;
+    showNavigationButtons: boolean;
     leftToRight: boolean;
     android: AndroidWebViewOptions;
     iOS: iOSWebViewOptions;
@@ -48,10 +46,9 @@ export interface iOSWebViewOptions {
     allowOverScroll: boolean;
     enableViewportScale: boolean;
     allowInLineMediaPlayback: boolean;
-    keyboardDisplayRequiresUserAction: boolean;
-    surpressedIncrementalRendering: boolean;
+    surpressIncrementalRendering: boolean;
     viewStyle: iOSViewStyle;
-    animation: iOSAnimation;
+    animationEffect: iOSAnimation;
 }
 export interface AndroidWebViewOptions {
     allowZoom: boolean;
@@ -63,7 +60,7 @@ export declare enum DismissStyle {
     CANCEL = 1,
     DONE = 2
 }
-export interface SystemBrowserOptions extends CommonOptions {
+export interface SystemBrowserOptions {
     android: AndroidSystemBrowserOptions;
     iOS: iOSSystemBrowserOptions;
 }
@@ -89,4 +86,9 @@ export interface AndroidSystemBrowserOptions {
 export interface BrowserCallbacks {
     onbrowserClosed: () => void;
     onbrowserPageLoaded: () => void;
+}
+export declare enum CallbackEvent {
+    SUCCESS = 1,
+    PAGE_CLOSED = 2,
+    PAGE_LOAD_COMPLETED = 3
 }

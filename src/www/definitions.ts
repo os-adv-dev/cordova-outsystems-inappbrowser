@@ -59,11 +59,10 @@ export interface iOSWebViewOptions {
 
   enableViewportScale: boolean;
   allowInLineMediaPlayback: boolean;
-  keyboardDisplayRequiresUserAction: boolean;
   surpressIncrementalRendering: boolean;
 
   viewStyle: iOSViewStyle;
-  animation: iOSAnimation;
+  animationEffect: iOSAnimation;
 }
 
 export interface AndroidWebViewOptions {
@@ -113,3 +112,9 @@ export interface BrowserCallbacks {
   onbrowserClosed: () => void,
   onbrowserPageLoaded: () => void
 }
+
+export enum CallbackEvent {
+  SUCCESS = 1,
+  PAGE_CLOSED = 2,
+  PAGE_LOAD_COMPLETED = 3
+} 
