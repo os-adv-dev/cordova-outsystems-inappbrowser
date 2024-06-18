@@ -1,20 +1,18 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-import android.content.Intent
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.ApplicationContextAdapter
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABApplicationRouterAdapter
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABWebViewRouterAdapter
 import com.outsystems.plugins.oscordova.CordovaImplementation
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
 import org.apache.cordova.CordovaWebView
 import org.json.JSONArray
-import org.json.JSONObject
 
 class OSInAppBrowser: CordovaImplementation() {
     override var callbackContext: CallbackContext? = null
@@ -23,9 +21,9 @@ class OSInAppBrowser: CordovaImplementation() {
 
     override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
         super.initialize(cordova, webView)
-        val applicationDelegate = ApplicationContextAdapter(cordova.context)
-        val router = OSIABApplicationRouterAdapter(applicationDelegate)
-        this.engine = OSIABEngine(router)
+        val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
+        val webViewRouter = OSIABWebViewRouterAdapter(cordova.context)
+        this.engine = OSIABEngine(externalBrowserRouter, webViewRouter)
     }
 
     override fun execute(
@@ -87,10 +85,7 @@ class OSInAppBrowser: CordovaImplementation() {
                 return
             }
 
-            // so that onActivityResult is called
-            setAsActivityResultCallback()
-
-            engine?.openWebView(this.getActivity(), url, webViewOptions) { success ->
+            engine?.openWebView(url, webViewOptions) { success ->
                 if (success) {
                     sendPluginResult("success", null)
                 } else {
