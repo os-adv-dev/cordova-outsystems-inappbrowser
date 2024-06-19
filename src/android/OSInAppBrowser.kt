@@ -78,12 +78,7 @@ class OSInAppBrowser: CordovaImplementation() {
         try {
             val arguments = args.getJSONObject(0)
             val url = arguments.getString("url")
-
             val webViewOptions = buildWebViewOptions(arguments.getString("options"))
-            if (webViewOptions == null) {
-                sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE.toPair())
-                return
-            }
 
             engine?.openWebView(url, webViewOptions) { success ->
                 if (success) {
@@ -127,26 +122,22 @@ class OSInAppBrowser: CordovaImplementation() {
      * Then, it uses the newly created object to create a 'OSIABWebViewOptions' object.
      * @param options The options to open the URL in a WebView, in a JSON string.
      */
-    private fun buildWebViewOptions(options: String): OSIABWebViewOptions? {
-        return try {
-            gson.fromJson(options, OSInAppBrowserWebViewInputArguments::class.java).let {
-                OSIABWebViewOptions(
-                    it.showURL ?: true,
-                    it.showToolbar ?: true,
-                    it.clearCache ?: true,
-                    it.clearSessionCache ?: true,
-                    it.mediaPlaybackRequiresUserAction ?: false,
-                    it.closeButtonText,
-                    it.toolbarPosition ?: OSIABToolbarPosition.TOP,
-                    it.leftToRight ?: false,
-                    it.showNavigationButtons ?: true,
-                    it.android.allowZoom ?: true,
-                    it.android.hardwareBack ?: true,
-                    it.android.pauseMedia ?: true
-                )
-            }
-        } catch (e: Exception) {
-            return null
+    private fun buildWebViewOptions(options: String): OSIABWebViewOptions {
+        return gson.fromJson(options, OSInAppBrowserWebViewInputArguments::class.java).let {
+            OSIABWebViewOptions(
+                it.showURL ?: true,
+                it.showToolbar ?: true,
+                it.clearCache ?: true,
+                it.clearSessionCache ?: true,
+                it.mediaPlaybackRequiresUserAction ?: false,
+                it.closeButtonText ?: "Close",
+                it.toolbarPosition ?: OSIABToolbarPosition.TOP,
+                it.leftToRight ?: false,
+                it.showNavigationButtons ?: true,
+                it.android.allowZoom ?: true,
+                it.android.hardwareBack ?: true,
+                it.android.pauseMedia ?: true
+            )
         }
     }
 
