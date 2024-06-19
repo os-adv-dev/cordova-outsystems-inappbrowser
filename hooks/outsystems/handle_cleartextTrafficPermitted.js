@@ -6,16 +6,6 @@ const CORDOVA_PREFERENCE_NAME = 'InAppBrowserCleartextTrafficPermitted';
 const ANDROID_PREFERENCE_NAME = 'cleartextTrafficPermitted';
 
 /**
- * Validates if the platform is Android
- * @param {object} context Cordova context
- * @returns {boolean} true if the platform is Android
- */
-function isPlatformAndroid(context) {
-    const platform = context.opts.plugin.platform;
-    return platform === 'android';
-}
-
-/**
  * Validates if the cleartextTrafficPermitted option should be enabled
  * @param {object} context Cordova context
  * @returns {boolean} true if the option should be enabled
@@ -25,7 +15,7 @@ function shouldEnableCleartextTrafficPermitted(context) {
     const configXML = path.join(projectRoot, 'config.xml');
     const configParser = new ConfigParser(configXML);
     const enable = configParser.getPlatformPreference(CORDOVA_PREFERENCE_NAME, 'android');
-    return enable === 'true' || enable === 'True';
+    return enable.toLowerCase() === 'true';
 }
 
 /**
@@ -61,7 +51,7 @@ function enableCleartextTrafficPermitted(context) {
 module.exports = function(context) {
     return new Promise(function(resolve) {
 
-        if (isPlatformAndroid(context) && shouldEnableCleartextTrafficPermitted(context)) {
+        if (shouldEnableCleartextTrafficPermitted(context)) {
             enableCleartextTrafficPermitted(context);
         }
 
