@@ -4,6 +4,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEventListener
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
@@ -12,17 +13,38 @@ import com.outsystems.plugins.oscordova.CordovaImplementation
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
 import org.apache.cordova.CordovaWebView
+import org.apache.cordova.PluginResult
 import org.json.JSONArray
+import org.json.JSONObject
 
 class OSInAppBrowser: CordovaImplementation() {
     override var callbackContext: CallbackContext? = null
     private var engine: OSIABEngine? = null
     private val gson by lazy { Gson() }
 
+    private var callbackContexts: MutableMap<String, CallbackContext> = mutableMapOf()
+
+    /**
+     * Sets a listener for the browser events
+     */
+    private val eventListener = object : OSIABEventListener {
+        override fun onBrowserFinished(callbackID: String?) {
+            callbackID?.let {
+                sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
+            }
+        }
+
+        override fun onBrowserPageLoaded(callbackID: String?) {
+            callbackID?.let {
+                sendSuccess(callbackID, OSIABEventType.BROWSER_PAGE_LOADED)
+            }
+        }
+    }
+
     override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
         super.initialize(cordova, webView)
         val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
-        val webViewRouter = OSIABWebViewRouterAdapter(cordova.context)
+        val webViewRouter = OSIABWebViewRouterAdapter(cordova.context, eventListener)
         this.engine = OSIABEngine(externalBrowserRouter, webViewRouter)
     }
 
@@ -32,16 +54,17 @@ class OSInAppBrowser: CordovaImplementation() {
         callbackContext: CallbackContext
     ): Boolean {
         this.callbackContext = callbackContext
+        val callbackID = callbackContext.callbackId
+        callbackContexts[callbackID] = callbackContext
 
         when(action) {
             "openInExternalBrowser" -> {
                 openInExternalBrowser(args)
             }
             "openInWebView" -> {
-                openInWebView(args)
+                openInWebView(args, callbackID)
             }
         }
-
         return true
     }
 
@@ -74,25 +97,22 @@ class OSInAppBrowser: CordovaImplementation() {
      * Calls the openWebView method of OSIABEngine to open the url in a WebView
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
      */
-    private fun openInWebView(args: JSONArray) {
+    private fun openInWebView(args: JSONArray, callbackID: String) {
         try {
             val arguments = args.getJSONObject(0)
             val url = arguments.getString("url")
             val webViewOptions = buildWebViewOptions(arguments.getString("options"))
 
-            engine?.openWebView(url, webViewOptions) { success ->
+            engine?.openWebView(url, webViewOptions, callbackID) { success ->
                 if (success) {
-                    sendPluginResult("success", null)
+                    sendSuccess(callbackID, OSIABEventType.SUCCESS)
                 } else {
-                    sendPluginResult(
-                        null,
-                        OSInAppBrowserError.OPEN_WEB_VIEW_FAILED.toPair()
-                    )
+                    sendError(callbackID, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED)
                 }
             }
         }
         catch (e: Exception) {
-            sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE.toPair())
+            sendError(callbackID, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
         }
     }
 
@@ -141,4 +161,37 @@ class OSInAppBrowser: CordovaImplementation() {
         }
     }
 
+    /**
+     * Helper method to send a success result
+     * @param callbackID CallbackID for the CallbackContext to send the result to
+     * @param event Event to be sent (SUCCESS, BROWSER_PAGE_LOADED, or BROWSER_FINISHED)
+     */
+    private fun sendSuccess(callbackID: String, event: OSIABEventType) {
+        val pluginResult = PluginResult(PluginResult.Status.OK, event.value)
+        pluginResult.keepCallback = true
+        callbackContexts[callbackID]?.sendPluginResult(pluginResult)
+    }
+
+    /**
+     * Helper method to send an error result
+     * @param callbackID CallbackID for the CallbackContext to send the result to
+     * @param error Error to be sent in the result
+     */
+    private fun sendError(callbackID: String, error: OSInAppBrowserError) {
+        val pluginResult = PluginResult(
+            PluginResult.Status.ERROR,
+            JSONObject().apply {
+                put("code", error.code)
+                put("message", error.message)
+            }
+        )
+        callbackContexts[callbackID]?.sendPluginResult(pluginResult)
+    }
+
+}
+
+enum class OSIABEventType(val value: Int) {
+    SUCCESS(1),
+    BROWSER_FINISHED(2),
+    BROWSER_PAGE_LOADED(3)
 }
