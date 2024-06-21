@@ -57,10 +57,11 @@ function openInSystemBrowser(url: string, options: SystemBrowserOptions, success
 function openInExternalBrowser(url: string, success: () => void, error: (error: PluginError) => void): void {
   exec(success, error, 'OSInAppBrowser', 'openInExternalBrowser', [{url}])
 }
-function close(): void {
-  console.log("close view...");
-  exec(()=>{}, () =>{}, 'OSInAppBrowser', 'coolMethod', [{}])
+
+function close(success: () => void, error: (error: PluginError) => void): void {
+  exec(success, error, 'OSInAppBrowser', 'close', [{}])  
 }
+
 function removeAllListeners(): void {
   console.log("remove all listeners...");
   exec(()=>{}, () =>{}, 'OSInAppBrowser', 'coolMethod', [{}])
