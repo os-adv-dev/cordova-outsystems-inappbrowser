@@ -17,6 +17,7 @@ allprojects {
 }
 
 dependencies{
+
     implementation("com.github.outsystems:osinappbrowser-android:0.0.12@aar")
 
     implementation("com.google.android.gms:play-services-auth:21.2.0")
