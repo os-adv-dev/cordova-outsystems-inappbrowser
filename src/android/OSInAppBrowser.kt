@@ -1,7 +1,5 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEventListener
@@ -9,34 +7,32 @@ import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbar
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABWebViewRouterAdapter
-import com.outsystems.plugins.oscordova.CordovaImplementation
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
+import org.apache.cordova.CordovaPlugin
 import org.apache.cordova.CordovaWebView
 import org.apache.cordova.PluginResult
 import org.json.JSONArray
 import org.json.JSONObject
 
-class OSInAppBrowser: CordovaImplementation() {
-    override var callbackContext: CallbackContext? = null
-    private var engine: OSIABEngine? = null
-    private val gson by lazy { Gson() }
+class OSInAppBrowser: CordovaPlugin() {
 
     private var callbackContexts: MutableMap<String, CallbackContext> = mutableMapOf()
+    private var engine: OSIABEngine? = null
+    private val gson by lazy { Gson() }
 
     /**
      * Sets a listener for the browser events
      */
     private val eventListener = object : OSIABEventListener {
-        override fun onBrowserFinished(callbackID: String?) {
-            callbackID?.let {
-                sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
-            }
-        }
-
         override fun onBrowserPageLoaded(callbackID: String?) {
             callbackID?.let {
                 sendSuccess(callbackID, OSIABEventType.BROWSER_PAGE_LOADED)
+            }
+        }
+        override fun onBrowserFinished(callbackID: String?) {
+            callbackID?.let {
+                sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
             }
         }
     }
@@ -53,13 +49,12 @@ class OSInAppBrowser: CordovaImplementation() {
         args: JSONArray,
         callbackContext: CallbackContext
     ): Boolean {
-        this.callbackContext = callbackContext
         val callbackID = callbackContext.callbackId
         callbackContexts[callbackID] = callbackContext
 
         when(action) {
             "openInExternalBrowser" -> {
-                openInExternalBrowser(args)
+                openInExternalBrowser(args, callbackID)
             }
             "openInWebView" -> {
                 openInWebView(args, callbackID)
@@ -72,24 +67,21 @@ class OSInAppBrowser: CordovaImplementation() {
      * Calls the openExternalBrowser method of OSIABEngine to open the url in the device's browser app
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
      */
-    private fun openInExternalBrowser(args: JSONArray) {
+    private fun openInExternalBrowser(args: JSONArray, callbackID: String) {
         try {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
 
             engine?.openExternalBrowser(url) { success ->
                 if (success) {
-                    sendPluginResult("success", null)
+                    sendSuccess(callbackID, OSIABEventType.SUCCESS)
                 } else {
-                    sendPluginResult(
-                        null,
-                        OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED.toPair()
-                    )
+                    sendError(callbackID, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED)
                 }
             }
         }
         catch (e: Exception) {
-            sendPluginResult(null, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE.toPair())
+            sendError(callbackID, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
         }
     }
 
@@ -118,23 +110,6 @@ class OSInAppBrowser: CordovaImplementation() {
 
     override fun onResume(multitasking: Boolean) {
         // Do nothing
-    }
-
-    override fun areGooglePlayServicesAvailable(): Boolean {
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val status = googleApiAvailability.isGooglePlayServicesAvailable(getActivity())
-
-        if (status != ConnectionResult.SUCCESS) {
-            val result: Pair<String, String> = if (googleApiAvailability.isUserResolvableError(status)) {
-                googleApiAvailability.getErrorDialog(getActivity(), status, 1)?.show()
-                OSInAppBrowserError.GOOGLE_SERVICES_RESOLVABLE_ERROR.toPair()
-            } else {
-                OSInAppBrowserError.GOOGLE_SERVICES_ERROR.toPair()
-            }
-            sendPluginResult(null, result)
-            return false
-        }
-        return true
     }
 
     /**
