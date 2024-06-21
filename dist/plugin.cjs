@@ -133,11 +133,8 @@ function openInSystemBrowser(url, options, success, error, browserCallbacks) {
 function openInExternalBrowser(url, success, error) {
   exec(success, error, "OSInAppBrowser", "openInExternalBrowser", [{ url }]);
 }
-function close() {
-  console.log("close view...");
-  exec(() => {
-  }, () => {
-  }, "OSInAppBrowser", "coolMethod", [{}]);
+function close(success, error) {
+  exec(success, error, "OSInAppBrowser", "close", [{}]);
 }
 function removeAllListeners() {
   console.log("remove all listeners...");

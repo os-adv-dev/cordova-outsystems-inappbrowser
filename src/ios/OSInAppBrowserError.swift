@@ -7,6 +7,7 @@ enum OSInAppBrowserTarget {
 enum OSInAppBrowserError: Error {
     case inputArgumentsIssue(target: OSInAppBrowserTarget)
     case failedToOpen(url: String, onTarget: OSInAppBrowserTarget)
+    case noBrowserToClose
     
     private var code: Int {
         let result: Int
@@ -14,6 +15,7 @@ enum OSInAppBrowserError: Error {
         switch self {
         case .inputArgumentsIssue: result = 0
         case .failedToOpen: result = 0
+        case .noBrowserToClose: result = 0
         }
         
         return result
@@ -43,6 +45,8 @@ enum OSInAppBrowserError: Error {
             }
             
             result = "Couldn't open '\(url)' using \(targetString)."
+        case .noBrowserToClose:
+            result = "No browser view to close."
         }
         
         return result
