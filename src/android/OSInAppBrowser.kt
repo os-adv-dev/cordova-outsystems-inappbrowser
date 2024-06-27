@@ -1,8 +1,9 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEventListener
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.helpers.OSIABFlowHelper
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
@@ -21,27 +22,9 @@ class OSInAppBrowser: CordovaPlugin() {
     private var engine: OSIABEngine? = null
     private val gson by lazy { Gson() }
 
-    /**
-     * Sets a listener for the browser events
-     */
-    private val eventListener = object : OSIABEventListener {
-        override fun onBrowserPageLoaded(callbackID: String?) {
-            callbackID?.let {
-                sendSuccess(callbackID, OSIABEventType.BROWSER_PAGE_LOADED)
-            }
-        }
-        override fun onBrowserFinished(callbackID: String?) {
-            callbackID?.let {
-                sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
-            }
-        }
-    }
-
     override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
         super.initialize(cordova, webView)
-        val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
-        val webViewRouter = OSIABWebViewRouterAdapter(cordova.context, eventListener)
-        this.engine = OSIABEngine(externalBrowserRouter, webViewRouter)
+        this.engine = OSIABEngine()
     }
 
     override fun execute(
@@ -72,7 +55,10 @@ class OSInAppBrowser: CordovaPlugin() {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
 
-            engine?.openExternalBrowser(url) { success ->
+            engine?.openExternalBrowser(
+                OSIABExternalBrowserRouterAdapter(cordova.context),
+                url
+            ) { success ->
                 if (success) {
                     sendSuccess(callbackID, OSIABEventType.SUCCESS)
                 } else {
@@ -95,7 +81,20 @@ class OSInAppBrowser: CordovaPlugin() {
             val url = arguments.getString("url")
             val webViewOptions = buildWebViewOptions(arguments.getString("options"))
 
-            engine?.openWebView(url, webViewOptions, callbackID) { success ->
+            val webViewRouter = OSIABWebViewRouterAdapter(
+                cordova.context,
+                cordova.activity.lifecycleScope,
+                webViewOptions,
+                OSIABFlowHelper(),
+                onBrowserPageLoaded = {
+                    sendSuccess(callbackID, OSIABEventType.BROWSER_PAGE_LOADED)
+                },
+                onBrowserFinished = {
+                    sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
+                }
+            )
+
+            engine?.openWebView(webViewRouter, url) { success ->
                 if (success) {
                     sendSuccess(callbackID, OSIABEventType.SUCCESS)
                 } else {
