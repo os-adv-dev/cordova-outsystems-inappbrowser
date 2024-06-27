@@ -11,6 +11,11 @@ The changes documented here do not include those from the original repository.
 ### Features
 
 - Add `OpenInSystemBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3424).
+- Add `OpenInWebView` with current features and default UI on Android (https://outsystemsrd.atlassian.net/browse/RMET-3426).
+- Add `Close` feature on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3427).
+- Add `OpenInWebView`'s interface customisations on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3489).
+- Add `OpenInWebView`'s event listeners on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3430).
+- Add `OpenInWebView`'s features on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3425).
 - Add `OpenInSystemBrowser`'s event listeners on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3429).
 - Add `OpenInSystemBrowser`'s features on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3423).
 - Add `OpenInExternalBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3422).

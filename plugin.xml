@@ -8,6 +8,9 @@
         <clobbers target="cordova.plugins.OSInAppBrowser" />
     </js-module>
     <platform name="android">
+
+        <hook type="before_plugin_install" src="hooks/outsystems/handle_cleartextTrafficPermitted.js" />
+
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="OSInAppBrowser">
                 <param name="android-package" value="com.outsystems.plugins.inappbrowser.osinappbrowser.OSInAppBrowser" />
@@ -22,16 +25,16 @@
         <source-file src="src/android/OSInAppBrowserError.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
-        <lib-file src="src/android/libs/OSInAppBrowserLib.aar" target="libs/OSInAppBrowserLib.aar" />
+        <source-file src="src/android/OSInAppBrowserSystemBrowserInputArguments.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
+        <source-file src="src/android/OSInAppBrowserWebViewInputArguments.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
     </platform>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="OSInAppBrowser">
                 <param name="ios-package" value="OSInAppBrowser" />
             </feature>
+            <preference name="SwiftVersion" value="5" />
         </config-file>
-
-        <dependency id="cordova-plugin-add-swift-support" url="https://github.com/OutSystems/cordova-plugin-add-swift-support.git#2.0.3-OS1"/>
 
         <source-file src="src/ios/OSInAppBrowser.swift" />
         <source-file src="src/ios/OSInAppBrowserError.swift" />

@@ -1,12 +1,14 @@
 import OSInAppBrowserLib
 import UIKit
 
+typealias OSInAppBrowserEngine = OSIABEngine<OSIABApplicationRouterAdapter, OSIABSafariViewControllerRouterAdapter, OSIABWebViewRouterAdapter>
+
 /// The plugin's main class
 @objc(OSInAppBrowser)
 class OSInAppBrowser: CDVPlugin {
     /// The native library's main class
-    private var plugin: OSIABEngine<OSIABApplicationRouterAdapter, OSIABSafariViewControllerRouterAdapter>?
-    private var currentlyOpenedBrowser: (any OSIABRouter)?
+    private var plugin: OSInAppBrowserEngine?
+    private var openedViewController: UIViewController?
     
     override func pluginInitialize() {
         self.plugin = .init()
@@ -14,52 +16,30 @@ class OSInAppBrowser: CDVPlugin {
     
     @objc(openInExternalBrowser:)
     func openInExternalBrowser(command: CDVInvokedUrlCommand) {
-        let target = OSInAppBrowserTarget.openInExternalBrowser
-        
-        func delegateExternalBrowser(_ url: String) {
-            DispatchQueue.main.async {
-                self.plugin?.openExternalBrowser(url, { [weak self] success in
-                    guard let self else { return }
-                    
-                    if success {
-                        self.sendSuccess(for: command.callbackId)
-                    } else {
-                        self.send(error: .failedToOpen(url: url, onTarget: target), for: command.callbackId)
-                    }
-                })
-            }
-        }
+        let target = OSInAppBrowserTarget.externalBrowser
         
         self.commandDelegate.run { [weak self] in
             guard let self else { return }
             
-            guard let argumentsModel: OSInAppBrowserInputArgumentsSimpleModel = self.createModel(for: command.argument(at: 0))
+            guard
+                let argumentsModel: OSInAppBrowserInputArgumentsSimpleModel = self.createModel(for: command.argument(at: 0)),
+                let url = URL(string: argumentsModel.url)
             else {
                 return self.send(error: .inputArgumentsIssue(target: target), for: command.callbackId)
             }
             
-            delegateExternalBrowser(argumentsModel.url)
+            delegateExternalBrowser(url, command.callbackId)
         }
     }
     
     @objc(openInSystemBrowser:)
     func openInSystemBrowser(command: CDVInvokedUrlCommand) {
-        let target = OSInAppBrowserTarget.openInSystemBrowser
+        let target = OSInAppBrowserTarget.systemBrowser
         
-        func delegateSystemBrowser(_ url: String, _ options: OSIABSystemBrowserOptions) {
+        func delegateSystemBrowser(_ url: URL, _ options: OSIABSystemBrowserOptions) {
             DispatchQueue.main.async {
-                self.currentlyOpenedBrowser = self.plugin?.openSystemBrowser(url, options, { [weak self] event, safariViewController in
-                    guard let self else { return }
-                    
-                    if event == .success {
-                        if let safariViewController {
-                            self.viewController.show(safariViewController, sender: nil)
-                        } else {
-                            self.send(error: .failedToOpen(url: url, onTarget: target), for: command.callbackId)
-                        }
-                    }
-                    
-                    self.sendSuccess(event, for: command.callbackId)
+                self.plugin?.openSystemBrowser(url, options, { [weak self] event, viewControllerToOpen in
+                    self?.handleResult(event, for: command.callbackId, checking: viewControllerToOpen, error: .failedToOpen(url: url.absoluteString, onTarget: target))
                 })
             }
         }
@@ -67,18 +47,108 @@ class OSInAppBrowser: CDVPlugin {
         self.commandDelegate.run { [weak self] in
             guard let self else { return }
             
-            guard let argumentsModel: OSInAppBrowserInputArgumentsSystemBrowserModel = self.createModel(for: command.argument(at: 0))
+            guard
+                let argumentsModel: OSInAppBrowserInputArgumentsComplexModel = self.createModel(for: command.argument(at: 0)),
+                let url = URL(string: argumentsModel.url)
             else {
                 return self.send(error: .inputArgumentsIssue(target: target), for: command.callbackId)
             }
                         
-            delegateSystemBrowser(argumentsModel.url, argumentsModel.toOptions())
+            delegateSystemBrowser(url, argumentsModel.toSystemBrowserOptions())
         }
     }
     
-    @objc(coolMethod:)
-    func coolMethod(command: CDVInvokedUrlCommand) {
-        //TODO
+    @objc(openInWebView:)
+    func openInWebView(command: CDVInvokedUrlCommand) {
+        let target = OSInAppBrowserTarget.webView
+        
+        func delegateWebView(_ url: URL, _ options: OSIABWebViewOptions) {
+            DispatchQueue.main.async {
+                self.plugin?.openWebView(
+                    url,
+                    options,
+                    onDelegateClose: { [weak self] in
+                        self?.viewController.dismiss(animated: true)
+                    },
+                    onDelegateURL: { [weak self] url in
+                        self?.delegateExternalBrowser(url, command.callbackId)
+                    },
+                    onDelegateAlertController: { [weak self] alert in
+                        self?.viewController.presentedViewController?.show(alert, sender: nil)
+                    }, { [weak self] event, viewControllerToOpen in
+                        self?.handleResult(event, for: command.callbackId, checking: viewControllerToOpen, error: .failedToOpen(url: url.absoluteString, onTarget: target))
+                    }
+                )
+            }
+        }
+        
+        self.commandDelegate.run { [weak self] in
+            guard let self else { return }
+            
+            guard
+                let argumentsModel: OSInAppBrowserInputArgumentsComplexModel = self.createModel(for: command.argument(at: 0)),
+                let url = URL(string: argumentsModel.url)
+            else {
+                return self.send(error: .inputArgumentsIssue(target: target), for: command.callbackId)
+            }
+            
+            let customUserAgent = self.commandDelegate.settings["overrideuseragent"] as? String
+            delegateWebView(url, argumentsModel.toWebViewOptions(with: customUserAgent))
+        }
+    }
+    
+    @objc(close:)
+    func close(command: CDVInvokedUrlCommand) {
+        self.commandDelegate.run { [weak self] in
+            guard let self else { return }
+            
+            if let openedViewController {
+                DispatchQueue.main.async {
+                    openedViewController.dismiss(animated: true) { [weak self] in
+                        self?.sendSuccess(for: command.callbackId)
+                    }
+                }
+            } else {
+                self.send(error: .noBrowserToClose, for: command.callbackId)
+            }
+        }
+    }
+}
+
+private extension OSInAppBrowser {
+    func delegateExternalBrowser(_ url: URL, _ callbackId: String) {
+        DispatchQueue.main.async {
+            self.plugin?.openExternalBrowser(url, { [weak self] success in
+                guard let self else { return }
+                
+                if success {
+                    self.sendSuccess(for: callbackId)
+                } else {
+                    self.send(error: .failedToOpen(url: url.absoluteString, onTarget: .externalBrowser), for: callbackId)
+                }
+            })
+        }
+    }
+    
+    func handleResult(_ event: OSIABEventType, for callbackId: String, checking viewController: UIViewController?, error: OSInAppBrowserError) {
+        let sendEvent: () -> Void = { self.sendSuccess(event, for: callbackId) }
+        
+        switch event {
+        case .success:
+            if let viewController {
+                self.present(viewController) { [weak self] in
+                    self?.openedViewController = viewController
+                    sendEvent()
+                }
+            } else {
+                self.send(error: error, for: callbackId)
+            }
+        case .pageClosed:
+            self.openedViewController = nil
+            fallthrough
+        case .pageLoadCompleted:
+            sendEvent()
+        }
     }
 }
 
@@ -91,14 +161,26 @@ private extension OSInAppBrowser {
         return argumentsModel
     }
     
+    func present(_ viewController: UIViewController, _ completionHandler: (() -> Void)?) {
+        let showNewViewController: () -> Void = {
+            self.viewController.present(viewController, animated: true, completion: completionHandler)
+        }
+        
+        if let presentedViewController = self.viewController.presentedViewController, presentedViewController == self.openedViewController {
+            presentedViewController.dismiss(animated: true, completion: showNewViewController)
+        } else {
+            showNewViewController()
+        }
+    }
+    
     func sendSuccess(_ eventType: OSIABEventType? = nil, for callbackId: String) {
         let pluginResult: CDVPluginResult
         if let eventType {
             pluginResult = .init(status: .ok, messageAs: eventType.rawValue)
-            pluginResult.keepCallback = true
         } else {
             pluginResult = .init(status: .ok)
         }
+        pluginResult.keepCallback = true
         self.commandDelegate.send(pluginResult, callbackId: callbackId)
     }
     
@@ -108,27 +190,47 @@ private extension OSInAppBrowser {
     }
 }
 
-private extension OSIABEngine where ExternalBrowser == OSIABApplicationRouterAdapter {
-    func openExternalBrowser(_ url: String, _ completionHandler: @escaping (Bool) -> Void) {
+private extension OSInAppBrowserEngine {
+    func openExternalBrowser(_ url: URL, _ completionHandler: @escaping (Bool) -> Void) {
         let router = OSIABApplicationRouterAdapter(UIApplication.shared)
         self.openExternalBrowser(url, routerDelegate: router, completionHandler)
     }
-}
-
-private extension OSIABEngine where SystemBrowser == OSIABSafariViewControllerRouterAdapter {
-    func openSystemBrowser(_ url: String, _ options: OSIABSystemBrowserOptions, _ completionHandler: @escaping (OSIABEventType, UIViewController?) -> Void) -> SystemBrowser {
+    
+    func openSystemBrowser(_ url: URL, _ options: OSIABSystemBrowserOptions, _ completionHandler: @escaping (OSIABEventType, UIViewController?) -> Void) {
         let router = OSIABSafariViewControllerRouterAdapter(
             options,
             onBrowserPageLoad: { completionHandler(.pageLoadCompleted, nil) },
             onBrowserClosed: { completionHandler(.pageClosed, nil) }
         )
         self.openSystemBrowser(url, routerDelegate: router) { completionHandler(.success, $0) }
-        return router
+    }
+    
+    func openWebView(
+        _ url: URL,
+        _ options: OSIABWebViewOptions,
+        onDelegateClose: @escaping () -> Void,
+        onDelegateURL: @escaping (URL) -> Void,
+        onDelegateAlertController: @escaping (UIAlertController) -> Void,
+        _ completionHandler: @escaping (OSIABEventType, UIViewController?) -> Void
+    ) {
+        let callbackHandler = OSIABWebViewCallbackHandler(
+            onDelegateURL: onDelegateURL,
+            onDelegateAlertController: onDelegateAlertController,
+            onBrowserPageLoad: { completionHandler(.pageLoadCompleted, nil) },
+            onBrowserClosed: { isAlreadyClosed in
+                if !isAlreadyClosed {
+                    onDelegateClose()
+                }
+                completionHandler(.pageClosed, nil)
+            }
+        )
+        let router = OSIABWebViewRouterAdapter(options, cacheManager: OSIABBrowserCacheManager(dataStore: .default()), callbackHandler: callbackHandler)
+        self.openWebView(url, routerDelegate: router) { completionHandler(.success, $0) }
     }
 }
-
+ 
 enum OSIABEventType: Int {
-    case success = 0
+    case success = 1
     case pageClosed
     case pageLoadCompleted
 }
