@@ -49,6 +49,7 @@ class OSInAppBrowser: CordovaPlugin() {
     /**
      * Calls the openExternalBrowser method of OSIABEngine to open the url in the device's browser app
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
+     * @param callbackID Identifies the CallbackContext the method should return to
      */
     private fun openInExternalBrowser(args: JSONArray, callbackID: String) {
         try {
@@ -74,6 +75,7 @@ class OSInAppBrowser: CordovaPlugin() {
     /**
      * Calls the openWebView method of OSIABEngine to open the url in a WebView
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
+     * @param callbackID Identifies the CallbackContext the method should return to
      */
     private fun openInWebView(args: JSONArray, callbackID: String) {
         try {
