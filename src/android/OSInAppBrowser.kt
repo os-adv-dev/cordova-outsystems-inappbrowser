@@ -17,8 +17,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class OSInAppBrowser: CordovaPlugin() {
-
-    private var callbackContexts: MutableMap<String, CallbackContext> = mutableMapOf()
     private var engine: OSIABEngine? = null
     private val gson by lazy { Gson() }
 
@@ -32,15 +30,12 @@ class OSInAppBrowser: CordovaPlugin() {
         args: JSONArray,
         callbackContext: CallbackContext
     ): Boolean {
-        val callbackID = callbackContext.callbackId
-        callbackContexts[callbackID] = callbackContext
-
         when(action) {
             "openInExternalBrowser" -> {
-                openInExternalBrowser(args, callbackID)
+                openInExternalBrowser(args, callbackContext)
             }
             "openInWebView" -> {
-                openInWebView(args, callbackID)
+                openInWebView(args, callbackContext)
             }
         }
         return true
@@ -49,9 +44,9 @@ class OSInAppBrowser: CordovaPlugin() {
     /**
      * Calls the openExternalBrowser method of OSIABEngine to open the url in the device's browser app
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
-     * @param callbackID Identifies the CallbackContext the method should return to
+     * @param callbackContext CallbackContext the method should return to
      */
-    private fun openInExternalBrowser(args: JSONArray, callbackID: String) {
+    private fun openInExternalBrowser(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
@@ -61,23 +56,23 @@ class OSInAppBrowser: CordovaPlugin() {
                 url
             ) { success ->
                 if (success) {
-                    sendSuccess(callbackID, OSIABEventType.SUCCESS)
+                    sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
-                    sendError(callbackID, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED)
+                    sendError(callbackContext, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED)
                 }
             }
         }
         catch (e: Exception) {
-            sendError(callbackID, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
         }
     }
 
     /**
      * Calls the openWebView method of OSIABEngine to open the url in a WebView
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
-     * @param callbackID Identifies the CallbackContext the method should return to
+     * @param callbackContext CallbackContext the method should return to
      */
-    private fun openInWebView(args: JSONArray, callbackID: String) {
+    private fun openInWebView(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val arguments = args.getJSONObject(0)
             val url = arguments.getString("url")
@@ -89,23 +84,23 @@ class OSInAppBrowser: CordovaPlugin() {
                 webViewOptions,
                 OSIABFlowHelper(),
                 onBrowserPageLoaded = {
-                    sendSuccess(callbackID, OSIABEventType.BROWSER_PAGE_LOADED)
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
                 },
                 onBrowserFinished = {
-                    sendSuccess(callbackID, OSIABEventType.BROWSER_FINISHED)
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
                 }
             )
 
             engine?.openWebView(webViewRouter, url) { success ->
                 if (success) {
-                    sendSuccess(callbackID, OSIABEventType.SUCCESS)
+                    sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
-                    sendError(callbackID, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED)
+                    sendError(callbackContext, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED)
                 }
             }
         }
         catch (e: Exception) {
-            sendError(callbackID, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
         }
     }
 
@@ -139,21 +134,21 @@ class OSInAppBrowser: CordovaPlugin() {
 
     /**
      * Helper method to send a success result
-     * @param callbackID CallbackID for the CallbackContext to send the result to
+     * @param callbackContext CallbackContext to send the result to
      * @param event Event to be sent (SUCCESS, BROWSER_PAGE_LOADED, or BROWSER_FINISHED)
      */
-    private fun sendSuccess(callbackID: String, event: OSIABEventType) {
+    private fun sendSuccess(callbackContext: CallbackContext, event: OSIABEventType) {
         val pluginResult = PluginResult(PluginResult.Status.OK, event.value)
         pluginResult.keepCallback = true
-        callbackContexts[callbackID]?.sendPluginResult(pluginResult)
+        callbackContext.sendPluginResult(pluginResult)
     }
 
     /**
      * Helper method to send an error result
-     * @param callbackID CallbackID for the CallbackContext to send the result to
+     * @param callbackContext CallbackContext to send the result to
      * @param error Error to be sent in the result
      */
-    private fun sendError(callbackID: String, error: OSInAppBrowserError) {
+    private fun sendError(callbackContext: CallbackContext, error: OSInAppBrowserError) {
         val pluginResult = PluginResult(
             PluginResult.Status.ERROR,
             JSONObject().apply {
@@ -161,7 +156,7 @@ class OSInAppBrowser: CordovaPlugin() {
                 put("message", error.message)
             }
         )
-        callbackContexts[callbackID]?.sendPluginResult(pluginResult)
+        callbackContext.sendPluginResult(pluginResult)
     }
 
 }
