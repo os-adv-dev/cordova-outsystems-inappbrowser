@@ -66,7 +66,8 @@ const DefaultWebViewOptions = {
   showNavigationButtons: true,
   leftToRight: false,
   android: DefaultAndroidWebViewOptions,
-  iOS: DefaultiOSWebViewOptions
+  iOS: DefaultiOSWebViewOptions,
+  customWebViewUserAgent: null
 };
 const DefaultiOSSystemBrowserOptions = {
   closeButtonText: DismissStyle.DONE,

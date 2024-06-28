@@ -127,7 +127,8 @@ class OSInAppBrowser: CordovaPlugin() {
                 it.showNavigationButtons ?: true,
                 it.android.allowZoom ?: true,
                 it.android.hardwareBack ?: true,
-                it.android.pauseMedia ?: true
+                it.android.pauseMedia ?: true,
+                it.customWebViewUserAgent
             )
         }
     }
