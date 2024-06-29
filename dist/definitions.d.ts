@@ -39,6 +39,7 @@ export interface WebViewOptions {
     toolbarPosition: ToolbarPosition;
     showNavigationButtons: boolean;
     leftToRight: boolean;
+    customWebViewUserAgent: String | null;
     android: AndroidWebViewOptions;
     iOS: iOSWebViewOptions;
 }

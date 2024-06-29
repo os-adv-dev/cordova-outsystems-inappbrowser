@@ -30,6 +30,7 @@ class OSInAppBrowserInputArgumentsComplexModel: OSInAppBrowserInputArgumentsSimp
         let toolbarPosition: OSIABToolbarPosition?
         let leftToRight: Bool?
         let showNavigationButtons: Bool?
+        let customWebViewUserAgent: String?
     }
     
     let options: Options
@@ -56,7 +57,7 @@ extension OSInAppBrowserInputArgumentsComplexModel {
         )
     }
     
-    func toWebViewOptions(with customUserAgent: String?) -> OSIABWebViewOptions {
+    func toWebViewOptions() -> OSIABWebViewOptions {
         OSIABWebViewOptions(
             showURL: self.options.showURL ?? true,
             showToolbar: self.options.showToolbar ?? true,
@@ -73,7 +74,7 @@ extension OSInAppBrowserInputArgumentsComplexModel {
             surpressIncrementalRendering: self.options.iOS.surpressIncrementalRendering ?? false,
             viewStyle: self.options.iOS.viewStyle ?? .defaultValue,
             animationEffect: self.options.iOS.animationEffect ?? .defaultValue,
-            customUserAgent: customUserAgent
+            customUserAgent: self.options.customWebViewUserAgent
         )
     }
 }

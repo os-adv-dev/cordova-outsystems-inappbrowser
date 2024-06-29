@@ -13,7 +13,8 @@ data class OSInAppBrowserWebViewInputArguments(
     @SerializedName("toolbarPosition") val toolbarPosition: OSIABToolbarPosition?,
     @SerializedName("leftToRight") val leftToRight: Boolean?,
     @SerializedName("showNavigationButtons") val showNavigationButtons: Boolean?,
-    @SerializedName("android") val android: OSInAppBrowserWebViewAndroidOptions?
+    @SerializedName("customWebViewUserAgent") val customWebViewUserAgent: String?,
+    @SerializedName("android") val android: OSInAppBrowserWebViewAndroidOptions
 )
 
 data class OSInAppBrowserWebViewAndroidOptions(

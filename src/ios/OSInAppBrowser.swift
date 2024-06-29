@@ -91,9 +91,8 @@ class OSInAppBrowser: CDVPlugin {
             else {
                 return self.send(error: .inputArgumentsIssue(target: target), for: command.callbackId)
             }
-            
-            let customUserAgent = self.commandDelegate.settings["overrideuseragent"] as? String
-            delegateWebView(url, argumentsModel.toWebViewOptions(with: customUserAgent))
+
+            delegateWebView(url, argumentsModel.toWebViewOptions())
         }
     }
     

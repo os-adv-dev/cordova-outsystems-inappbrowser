@@ -11,6 +11,8 @@ The changes documented here do not include those from the original repository.
 ### Features
 
 - Add `OpenInSystemBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3424).
+- Add possibility to override the user agent used in `OpenInWebView`'s webview (https://outsystemsrd.atlassian.net/browse/RMET-3490).
+- Add browser events to `OpenInWebView` feature (https://outsystemsrd.atlassian.net/browse/RMET-3432).
 - Add `OpenInWebView` with current features and default UI on Android (https://outsystemsrd.atlassian.net/browse/RMET-3426).
 - Add `Close` feature on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3427).
 - Add `OpenInWebView`'s interface customisations on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3489).

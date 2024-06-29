@@ -32,7 +32,8 @@ export const DefaultWebViewOptions: WebViewOptions = {
     leftToRight: false,
 
     android: DefaultAndroidWebViewOptions,
-    iOS: DefaultiOSWebViewOptions
+    iOS: DefaultiOSWebViewOptions,
+    customWebViewUserAgent: null
 }
 
 export const DefaultiOSSystemBrowserOptions: iOSSystemBrowserOptions = {
