@@ -4,8 +4,12 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.helpers.OSIABFlowHelper
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABAnimation
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABCustomTabsOptions
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABViewStyle
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABCustomTabsRouterAdapter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABWebViewRouterAdapter
 import org.apache.cordova.CallbackContext
@@ -33,6 +37,9 @@ class OSInAppBrowser: CordovaPlugin() {
         when(action) {
             "openInExternalBrowser" -> {
                 openInExternalBrowser(args, callbackContext)
+            }
+            "openInSystemBrowser" -> {
+                openInSystemBrowser(args, callbackContext)
             }
             "openInWebView" -> {
                 openInWebView(args, callbackContext)
@@ -66,6 +73,44 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
         }
     }
+
+
+    /**
+     * Calls the openCustomTabs method of OSIABEngine to open the url in Custom Tabs
+     * @param args JSONArray that contains the parameters to parse (e.g. url to open)
+     * @param callbackContext CallbackContext the method should return to
+     */
+    private fun openInSystemBrowser(args: JSONArray, callbackContext: CallbackContext) {
+        try {
+            val argumentsDictionary = args.getJSONObject(0)
+            val url = argumentsDictionary.getString("url")
+            val customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
+            val customTabsRouter = OSIABCustomTabsRouterAdapter(
+                context = cordova.context,
+                lifecycleScope = cordova.activity.lifecycleScope,
+                options = customTabsOptions,
+                onBrowserPageLoaded = {
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
+                },
+                onBrowserFinished = {
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
+                }
+            )
+
+            engine?.openCustomTabs(customTabsRouter, url) { success ->
+                if (success) {
+                    sendSuccess(callbackContext, OSIABEventType.SUCCESS)
+                } else {
+                    sendError(callbackContext, OSInAppBrowserError.OPEN_SYSTEM_BROWSER_FAILED)
+                }
+            }
+        }
+        catch (e: Exception) {
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
+        }
+    }
+
+
 
     /**
      * Calls the openWebView method of OSIABEngine to open the url in a WebView
@@ -108,6 +153,27 @@ class OSInAppBrowser: CordovaPlugin() {
         // Do nothing
     }
 
+
+    /**
+     * Parses options that come in a JSObject to create a 'OSInAppBrowserSystemBrowserInputArguments' object.
+     * Then, it uses the newly created object to create a 'OSIABCustomTabsOptions' object.
+     * @param options The options to open the URL in the system browser (Custom Tabs) , in a JSON string.
+     */
+    private fun buildCustomTabsOptions(options: String): OSIABCustomTabsOptions {
+        return gson.fromJson(options, OSInAppBrowserSystemBrowserInputArguments::class.java).let {
+            OSIABCustomTabsOptions(
+                showTitle = it.android?.showTitle ?: true,
+                hideToolbarOnScroll = it.android?.hideToolbarOnScroll ?: false,
+                viewStyle = it.android?.viewStyle ?: OSIABViewStyle.FULL_SCREEN,
+                bottomSheetOptions = it.android?.bottomSheetOptions,
+                startAnimation = it.android?.startAnimation ?: OSIABAnimation.FADE_IN,
+                exitAnimation = it.android?.exitAnimation ?: OSIABAnimation.FADE_OUT
+            )
+        }
+    }
+
+
+
     /**
      * Parses options that come in JSON to a 'OSInAppBrowserWebViewInputArguments'.
      * Then, it uses the newly created object to create a 'OSIABWebViewOptions' object.
@@ -127,8 +193,7 @@ class OSInAppBrowser: CordovaPlugin() {
                 it.showNavigationButtons ?: true,
                 it.android.allowZoom ?: true,
                 it.android.hardwareBack ?: true,
-                it.android.pauseMedia ?: true,
-                it.customWebViewUserAgent
+                it.android.pauseMedia ?: true
             )
         }
     }
