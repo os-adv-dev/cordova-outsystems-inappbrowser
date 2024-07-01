@@ -81,7 +81,7 @@ class OSInAppBrowser: CordovaPlugin() {
         try {
             val argumentsDictionary = args.getJSONObject(0)
             val url = argumentsDictionary.getString("url")
-            val customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
+            val customTabsOptions = buildCustomTabsOptions(argumentsDictionary.getString("options"))
             val customTabsRouter = OSIABCustomTabsRouterAdapter(
                 context = cordova.context,
                 lifecycleScope = cordova.activity.lifecycleScope,
@@ -110,7 +110,7 @@ class OSInAppBrowser: CordovaPlugin() {
         try {
             val arguments = args.getJSONObject(0)
             val url = arguments.getString("url")
-            val webViewOptions = buildWebViewOptions(arguments.optString("options", "{}"))
+            val webViewOptions = buildWebViewOptions(arguments.getString("options"))
 
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
