@@ -55,6 +55,7 @@ class OSInAppBrowser: CordovaPlugin() {
      */
     private fun openInExternalBrowser(args: JSONArray, callbackContext: CallbackContext) {
         val url: String?
+
         try {
             val argumentsDictionary = args.getJSONObject(0)
             url = argumentsDictionary.getString("url")
@@ -64,6 +65,7 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
             return
         }
+
         try {
             val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
 
@@ -94,10 +96,12 @@ class OSInAppBrowser: CordovaPlugin() {
             url = argumentsDictionary.getString("url")
             if (url.isNullOrEmpty()) throw IllegalArgumentException()
             customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
             return
         }
+
         try {
             val customTabsRouter = OSIABCustomTabsRouterAdapter(
                 context = cordova.context,
@@ -143,6 +147,7 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
             return
         }
+        
         try {
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
