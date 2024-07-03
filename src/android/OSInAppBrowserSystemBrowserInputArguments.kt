@@ -1,9 +1,7 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
 import com.google.gson.annotations.SerializedName
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABAnimation
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABBottomSheet
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABViewStyle
 
 data class OSInAppBrowserSystemBrowserInputArguments(
     @SerializedName("android") val android: OSInAppBrowserSystemBrowserAndroidOptions?

@@ -55,7 +55,6 @@ class OSInAppBrowser: CordovaPlugin() {
      */
     private fun openInExternalBrowser(args: JSONArray, callbackContext: CallbackContext) {
         val url: String?
-
         try {
             val argumentsDictionary = args.getJSONObject(0)
             url = argumentsDictionary.getString("url")
@@ -65,7 +64,6 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
             return
         }
-
         try {
             val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
 
@@ -82,7 +80,6 @@ class OSInAppBrowser: CordovaPlugin() {
         }
     }
 
-
     /**
      * Calls the openCustomTabs method of OSIABEngine to open the url in Custom Tabs
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
@@ -96,14 +93,11 @@ class OSInAppBrowser: CordovaPlugin() {
             val argumentsDictionary = args.getJSONObject(0)
             url = argumentsDictionary.getString("url")
             if (url.isNullOrEmpty()) throw IllegalArgumentException()
-
-            customTabsOptions =
-                buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
+            customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
         } catch (e: Exception) {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
             return
         }
-
         try {
             val customTabsRouter = OSIABCustomTabsRouterAdapter(
                 context = cordova.context,
@@ -130,8 +124,6 @@ class OSInAppBrowser: CordovaPlugin() {
         }
     }
 
-
-
     /**
      * Calls the openWebView method of OSIABEngine to open the url in a WebView
      * @param args JSONArray that contains the parameters to parse (e.g. url to open)
@@ -151,7 +143,6 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
             return
         }
-
         try {
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
@@ -165,6 +156,7 @@ class OSInAppBrowser: CordovaPlugin() {
                     sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
                 }
             )
+
             engine?.openWebView(webViewRouter, url) { success ->
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
