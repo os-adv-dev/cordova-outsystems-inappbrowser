@@ -94,7 +94,7 @@ class OSInAppBrowser: CordovaPlugin() {
         try {
             val argumentsDictionary = args.getJSONObject(0)
             url = argumentsDictionary.getString("url")
-            if (url.isNullOrEmpty()) throw IllegalArgumentException()
+            if(url.isNullOrEmpty()) throw IllegalArgumentException()
             customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
         }
         catch (e: Exception) {
@@ -147,7 +147,7 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
             return
         }
-        
+
         try {
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
