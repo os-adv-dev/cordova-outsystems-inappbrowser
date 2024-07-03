@@ -1,11 +1,11 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.helpers.OSIABFlowHelper
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABAnimation
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABCustomTabsOptions
+import androidx.lifecycle.lifecycleScope
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.helpers.OSIABFlowHelper
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABViewStyle
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebViewOptions
@@ -54,14 +54,22 @@ class OSInAppBrowser: CordovaPlugin() {
      * @param callbackContext CallbackContext the method should return to
      */
     private fun openInExternalBrowser(args: JSONArray, callbackContext: CallbackContext) {
+        val url: String?
+
         try {
             val argumentsDictionary = args.getJSONObject(0)
-            val url = argumentsDictionary.getString("url")
+            url = argumentsDictionary.getString("url")
+            if(url.isNullOrEmpty()) throw IllegalArgumentException()
+        }
+        catch (e: Exception) {
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
+            return
+        }
 
-            engine?.openExternalBrowser(
-                OSIABExternalBrowserRouterAdapter(cordova.context),
-                url
-            ) { success ->
+        try {
+            val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
+
+            engine?.openExternalBrowser(externalBrowserRouter, url) { success ->
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
@@ -70,7 +78,7 @@ class OSInAppBrowser: CordovaPlugin() {
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
+            sendError(callbackContext, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED)
         }
     }
 
@@ -81,10 +89,22 @@ class OSInAppBrowser: CordovaPlugin() {
      * @param callbackContext CallbackContext the method should return to
      */
     private fun openInSystemBrowser(args: JSONArray, callbackContext: CallbackContext) {
+        val url: String?
+        val customTabsOptions: OSIABCustomTabsOptions?
+
         try {
             val argumentsDictionary = args.getJSONObject(0)
-            val url = argumentsDictionary.getString("url")
-            val customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
+            url = argumentsDictionary.getString("url")
+            if (url.isNullOrEmpty()) throw IllegalArgumentException()
+
+            customTabsOptions =
+                buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
+        } catch (e: Exception) {
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
+            return
+        }
+
+        try {
             val customTabsRouter = OSIABCustomTabsRouterAdapter(
                 context = cordova.context,
                 lifecycleScope = cordova.activity.lifecycleScope,
@@ -106,7 +126,7 @@ class OSInAppBrowser: CordovaPlugin() {
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
+            sendError(callbackContext, OSInAppBrowserError.OPEN_SYSTEM_BROWSER_FAILED)
         }
     }
 
@@ -118,11 +138,21 @@ class OSInAppBrowser: CordovaPlugin() {
      * @param callbackContext CallbackContext the method should return to
      */
     private fun openInWebView(args: JSONArray, callbackContext: CallbackContext) {
-        try {
-            val arguments = args.getJSONObject(0)
-            val url = arguments.getString("url")
-            val webViewOptions = buildWebViewOptions(arguments.getString("options"))
+        val url: String?
+        val webViewOptions: OSIABWebViewOptions?
 
+        try {
+            val argumentsDictionary = args.getJSONObject(0)
+            url = argumentsDictionary.getString("url")
+            if(url.isNullOrEmpty()) throw IllegalArgumentException()
+            webViewOptions = buildWebViewOptions(argumentsDictionary.optString("options", "{}"))
+        }
+        catch (e: Exception) {
+            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
+            return
+        }
+
+        try {
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
                 cordova.activity.lifecycleScope,
@@ -135,7 +165,6 @@ class OSInAppBrowser: CordovaPlugin() {
                     sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
                 }
             )
-
             engine?.openWebView(webViewRouter, url) { success ->
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
@@ -145,14 +174,9 @@ class OSInAppBrowser: CordovaPlugin() {
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
+            sendError(callbackContext, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED)
         }
     }
-
-    override fun onResume(multitasking: Boolean) {
-        // Do nothing
-    }
-
 
     /**
      * Parses options that come in a JSObject to create a 'OSInAppBrowserSystemBrowserInputArguments' object.
@@ -164,15 +188,19 @@ class OSInAppBrowser: CordovaPlugin() {
             OSIABCustomTabsOptions(
                 showTitle = it.android?.showTitle ?: true,
                 hideToolbarOnScroll = it.android?.hideToolbarOnScroll ?: false,
-                viewStyle = it.android?.viewStyle ?: OSIABViewStyle.FULL_SCREEN,
+                viewStyle = it.android?.viewStyle?.let { ordinal ->
+                    OSIABViewStyle.entries[ordinal]
+                } ?: OSIABViewStyle.FULL_SCREEN,
                 bottomSheetOptions = it.android?.bottomSheetOptions,
-                startAnimation = it.android?.startAnimation ?: OSIABAnimation.FADE_IN,
-                exitAnimation = it.android?.exitAnimation ?: OSIABAnimation.FADE_OUT
+                startAnimation = it.android?.startAnimation?.let { ordinal ->
+                    OSIABAnimation.entries[ordinal]
+                } ?: OSIABAnimation.FADE_IN,
+                exitAnimation = it.android?.exitAnimation?.let { ordinal ->
+                    OSIABAnimation.entries[ordinal]
+                } ?: OSIABAnimation.FADE_OUT
             )
         }
     }
-
-
 
     /**
      * Parses options that come in JSON to a 'OSInAppBrowserWebViewInputArguments'.
