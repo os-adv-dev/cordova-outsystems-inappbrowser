@@ -185,16 +185,10 @@ class OSInAppBrowser: CordovaPlugin() {
             OSIABCustomTabsOptions(
                 showTitle = it.android?.showTitle ?: true,
                 hideToolbarOnScroll = it.android?.hideToolbarOnScroll ?: false,
-                viewStyle = it.android?.viewStyle?.let { ordinal ->
-                    OSIABViewStyle.entries[ordinal]
-                } ?: OSIABViewStyle.FULL_SCREEN,
+                viewStyle = it.android?.viewStyle ?: OSIABViewStyle.FULL_SCREEN,
                 bottomSheetOptions = it.android?.bottomSheetOptions,
-                startAnimation = it.android?.startAnimation?.let { ordinal ->
-                    OSIABAnimation.entries[ordinal]
-                } ?: OSIABAnimation.FADE_IN,
-                exitAnimation = it.android?.exitAnimation?.let { ordinal ->
-                    OSIABAnimation.entries[ordinal]
-                } ?: OSIABAnimation.FADE_OUT
+                startAnimation = it.android?.startAnimation ?: OSIABAnimation.FADE_IN,
+                exitAnimation = it.android?.exitAnimation ?: OSIABAnimation.FADE_OUT
             )
         }
     }
