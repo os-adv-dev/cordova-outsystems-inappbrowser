@@ -55,7 +55,7 @@ class OSInAppBrowser: CordovaPlugin() {
      */
     private fun openInExternalBrowser(args: JSONArray, callbackContext: CallbackContext) {
         val url: String?
-        
+
         try {
             val argumentsDictionary = args.getJSONObject(0)
             url = argumentsDictionary.getString("url")
@@ -65,7 +65,7 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE)
             return
         }
-        
+
         try {
             val externalBrowserRouter = OSIABExternalBrowserRouterAdapter(cordova.context)
 
@@ -101,12 +101,18 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE)
             return
         }
-        
+
         try {
             val customTabsRouter = OSIABCustomTabsRouterAdapter(
                 context = cordova.context,
                 lifecycleScope = cordova.activity.lifecycleScope,
-                options = customTabsOptions
+                options = customTabsOptions,
+                onBrowserPageLoaded = {
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
+                },
+                onBrowserFinished = {
+                    sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
+                }
             )
 
             engine?.openCustomTabs(customTabsRouter, url) { success ->
@@ -141,7 +147,7 @@ class OSInAppBrowser: CordovaPlugin() {
             sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE)
             return
         }
-        
+
         try {
             val webViewRouter = OSIABWebViewRouterAdapter(
                 cordova.context,
@@ -173,7 +179,7 @@ class OSInAppBrowser: CordovaPlugin() {
      * Parses options that come in a JSObject to create a 'OSInAppBrowserSystemBrowserInputArguments' object.
      * Then, it uses the newly created object to create a 'OSIABCustomTabsOptions' object.
      * @param options The options to open the URL in the system browser (Custom Tabs) , in a JSON string.
-    */
+     */
     private fun buildCustomTabsOptions(options: String): OSIABCustomTabsOptions {
         return gson.fromJson(options, OSInAppBrowserSystemBrowserInputArguments::class.java).let {
             OSIABCustomTabsOptions(
