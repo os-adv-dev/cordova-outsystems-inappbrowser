@@ -8,10 +8,6 @@ enum class OSInAppBrowserError(val code: Int, val message: String) {
     OPEN_SYSTEM_BROWSER_FAILED(104, "Couldn't open {url} using Custom Tabs."),
     OPEN_WEB_VIEW_FAILED(105, "Couldn't open {url} using the WebView.");
 
-    companion object {
-        private const val ERROR_FORMAT_PREFIX = "OS-PLUG-IABP-"
-    }
-
     fun getErrorMessage(url: String?): String {
         return url?.let {
             message.replace("{url}", url)
@@ -19,7 +15,7 @@ enum class OSInAppBrowserError(val code: Int, val message: String) {
     }
 
     fun formatErrorCode(): String {
-        return ERROR_FORMAT_PREFIX + code.toString().padStart(4, '0')
+        return "OS-PLUG-IABP-" + code.toString().padStart(4, '0')
     }
 
 }
