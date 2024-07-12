@@ -1,22 +1,33 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-enum class OSInAppBrowserError(val code: Int, val message: String) {
-    INPUT_ARGUMENTS_EXTERNAL_BROWSER_ISSUE(100, "The 'openInExternalBrowser' input parameters aren't valid."),
-    INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE(101, "The 'openInSystemBrowser' input parameters aren't valid."),
-    INPUT_ARGUMENTS_WEB_VIEW_ISSUE(102, "The 'openInWebView' input parameters aren't valid."),
-    OPEN_EXTERNAL_BROWSER_FAILED(103, "External browser couldn't open the following URL: {url}"),
-    OPEN_SYSTEM_BROWSER_FAILED(104, "Custom Tabs couldn't open the following URL: {url}"),
-    OPEN_WEB_VIEW_FAILED(105, "The WebView couldn't open the following URL: {url}"),
-    CLOSE_FAILED(106, "There’s no browser view to close.");
+sealed class OSInAppBrowserError(val code: String, val message: String) {
+    data class InputArgumentsIssue(val target: OSInAppBrowserTarget) : OSInAppBrowserError(
+        code = target.inputIssueCode.formatErrorCode(),
+        message = "The '${target.inputIssueText}' input parameters aren't valid."
+    )
 
-    fun getErrorMessage(url: String?): String {
-        return url?.let {
-            message.replace("{url}", url)
-        } ?: message
-    }
+    data class OpenFailed(val url: String, val target: OSInAppBrowserTarget) : OSInAppBrowserError(
+        code = target.openFailedCode.formatErrorCode(),
+        message = "${target.openFailedText} couldn't open the following URL: $url"
+    )
 
-    fun formatErrorCode(): String {
-        return "OS-PLUG-IABP-" + code.toString().padStart(4, '0')
-    }
+    data object CloseFailed : OSInAppBrowserError(
+        code = 12.formatErrorCode(),
+        message = "There’s no browser view to close."
+    )
+}
 
+enum class OSInAppBrowserTarget(
+    val inputIssueCode: Int,
+    val inputIssueText: String,
+    val openFailedCode: Int,
+    val openFailedText: String
+) {
+    EXTERNAL_BROWSER(5, "openInExternalBrowser", 8, "External browser"),
+    SYSTEM_BROWSER(6, "openInSystemBrowser", 10, "Custom Tabs"),
+    WEB_VIEW(7, "openInWebView", 11, "The WebView")
+}
+
+private fun Int.formatErrorCode(): String {
+    return "OS-PLUG-IABP-" + this.toString().padStart(4, '0')
 }

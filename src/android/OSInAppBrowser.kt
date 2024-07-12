@@ -62,7 +62,7 @@ class OSInAppBrowser: CordovaPlugin() {
             if(url.isNullOrEmpty()) throw IllegalArgumentException()
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_ISSUE, null)
+            sendError(callbackContext, OSInAppBrowserError.InputArgumentsIssue(OSInAppBrowserTarget.EXTERNAL_BROWSER))
             return
         }
 
@@ -73,12 +73,12 @@ class OSInAppBrowser: CordovaPlugin() {
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
-                    sendError(callbackContext, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED, url)
+                    sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.EXTERNAL_BROWSER))
                 }
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.OPEN_EXTERNAL_BROWSER_FAILED, url)
+            sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.EXTERNAL_BROWSER))
         }
     }
 
@@ -98,7 +98,7 @@ class OSInAppBrowser: CordovaPlugin() {
             customTabsOptions = buildCustomTabsOptions(argumentsDictionary.optString("options", "{}"))
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE, null)
+            sendError(callbackContext, OSInAppBrowserError.InputArgumentsIssue(OSInAppBrowserTarget.SYSTEM_BROWSER))
             return
         }
 
@@ -119,12 +119,12 @@ class OSInAppBrowser: CordovaPlugin() {
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
-                    sendError(callbackContext, OSInAppBrowserError.OPEN_SYSTEM_BROWSER_FAILED, url)
+                    sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.SYSTEM_BROWSER))
                 }
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.OPEN_SYSTEM_BROWSER_FAILED, url)
+            sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.SYSTEM_BROWSER))
         }
     }
 
@@ -144,7 +144,7 @@ class OSInAppBrowser: CordovaPlugin() {
             webViewOptions = buildWebViewOptions(argumentsDictionary.optString("options", "{}"))
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.INPUT_ARGUMENTS_WEB_VIEW_ISSUE, null)
+            sendError(callbackContext, OSInAppBrowserError.InputArgumentsIssue(OSInAppBrowserTarget.WEB_VIEW))
             return
         }
 
@@ -166,12 +166,12 @@ class OSInAppBrowser: CordovaPlugin() {
                 if (success) {
                     sendSuccess(callbackContext, OSIABEventType.SUCCESS)
                 } else {
-                    sendError(callbackContext, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED, url)
+                    sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.WEB_VIEW))
                 }
             }
         }
         catch (e: Exception) {
-            sendError(callbackContext, OSInAppBrowserError.OPEN_WEB_VIEW_FAILED, url)
+            sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.WEB_VIEW))
         }
     }
 
@@ -234,12 +234,12 @@ class OSInAppBrowser: CordovaPlugin() {
      * @param callbackContext CallbackContext to send the result to
      * @param error Error to be sent in the result
      */
-    private fun sendError(callbackContext: CallbackContext, error: OSInAppBrowserError, url: String?) {
+    private fun sendError(callbackContext: CallbackContext, error: OSInAppBrowserError) {
         val pluginResult = PluginResult(
             PluginResult.Status.ERROR,
             JSONObject().apply {
-                put("code", error.formatErrorCode())
-                put("message", error.getErrorMessage(url))
+                put("code", error.code)
+                put("message", error.message)
             }
         )
         callbackContext.sendPluginResult(pluginResult)
