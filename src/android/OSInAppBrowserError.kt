@@ -1,10 +1,33 @@
 package com.outsystems.plugins.inappbrowser.osinappbrowser
 
-enum class OSInAppBrowserError(val code: Int, val message: String) {
-    INPUT_ARGUMENTS_ISSUE(100, "The input parameters for 'openInExternalBrowser' are invalid."),
-    INPUT_ARGUMENTS_SYSTEM_BROWSER_ISSUE(101, "The input parameters for 'openInSystemBrowser' are invalid."),
-    INPUT_ARGUMENTS_WEB_VIEW_ISSUE(102, "The input parameters for 'openInWebView' are invalid."),
-    OPEN_EXTERNAL_BROWSER_FAILED(103, "Couldn't open url using the external browser."),
-    OPEN_SYSTEM_BROWSER_FAILED(104, "Couldn't open url using the system browser."),
-    OPEN_WEB_VIEW_FAILED(105, "Couldn't open url using the WebView.")
+sealed class OSInAppBrowserError(val code: String, val message: String) {
+    data class InputArgumentsIssue(val target: OSInAppBrowserTarget) : OSInAppBrowserError(
+        code = target.inputIssueCode.formatErrorCode(),
+        message = "The '${target.inputIssueText}' input parameters aren't valid."
+    )
+
+    data class OpenFailed(val url: String, val target: OSInAppBrowserTarget) : OSInAppBrowserError(
+        code = target.openFailedCode.formatErrorCode(),
+        message = "${target.openFailedText} couldn't open the following URL: $url"
+    )
+
+    data object CloseFailed : OSInAppBrowserError(
+        code = 12.formatErrorCode(),
+        message = "There’s no browser view to close."
+    )
+}
+
+enum class OSInAppBrowserTarget(
+    val inputIssueCode: Int,
+    val inputIssueText: String,
+    val openFailedCode: Int,
+    val openFailedText: String
+) {
+    EXTERNAL_BROWSER(5, "openInExternalBrowser", 8, "External browser"),
+    SYSTEM_BROWSER(6, "openInSystemBrowser", 10, "Custom Tabs"),
+    WEB_VIEW(7, "openInWebView", 11, "The WebView")
+}
+
+private fun Int.formatErrorCode(): String {
+    return "OS-PLUG-IABP-" + this.toString().padStart(4, '0')
 }
