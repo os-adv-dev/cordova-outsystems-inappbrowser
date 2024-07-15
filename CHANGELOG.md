@@ -9,6 +9,7 @@ The changes documented here do not include those from the original repository.
 ## [1.0.0]
 
 ### Features
+- Add error codes and messages on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3465).
 - Format error codes and messages on Android (https://outsystemsrd.atlassian.net/browse/RMET-3466).
 - Add permissions requests and opening file chooser to `OpenInWebView` feature on Android (https://outsystemsrd.atlassian.net/browse/RMET-3534).
 - Add error and loading screens for `OpenInWebView` feature for Android (https://outsystemsrd.atlassian.net/browse/RMET-3492).

@@ -10,15 +10,21 @@ enum OSInAppBrowserError: Error {
     case noBrowserToClose
     
     private var code: Int {
-        let result: Int
-        
-        switch self {
-        case .inputArgumentsIssue: result = 0
-        case .failedToOpen: result = 0
-        case .noBrowserToClose: result = 0
+        return switch self {
+        case .inputArgumentsIssue(let target):
+            switch target {
+            case .externalBrowser: 5
+            case .systemBrowser: 6
+            case .webView: 7
+            }
+        case .failedToOpen(url: _, onTarget: let target):
+            switch target {
+            case .externalBrowser: 8
+            case .systemBrowser: 9
+            case .webView: 11
+            }
+        case .noBrowserToClose: 12
         }
-        
-        return result
     }
     
     private var description: String {
@@ -26,27 +32,23 @@ enum OSInAppBrowserError: Error {
         
         switch self {
         case .inputArgumentsIssue(let target):             
-            let targetString: String
-            
-            switch target {
-            case .externalBrowser: targetString = "openInExternalBrowser"
-            case .systemBrowser: targetString = "openInSystemBrowser"
-            case .webView: targetString = "openInWebView"
+            let targetString = switch target {
+            case .externalBrowser: "openInExternalBrowser"
+            case .systemBrowser: "openInSystemBrowser"
+            case .webView: "openInWebView"
             }
             
-            result = "The input parameters for '\(targetString)' are invalid."
+            result = "The '\(targetString)' input parameters aren't valid."
         case .failedToOpen(url: let url, onTarget: let target):
-            let targetString: String
-            
-            switch target {
-            case .externalBrowser: targetString = "Safari"
-            case .systemBrowser: targetString = "SFSafariViewController"
-            case .webView: targetString = "WebView"
+            let targetString = switch target {
+            case .externalBrowser: "External browser"
+            case .systemBrowser: "SafariViewController"
+            case .webView: "The WebView"
             }
             
-            result = "Couldn't open '\(url)' using \(targetString)."
+            result = "\(targetString) couldn't open the following URL: '\(url)'"
         case .noBrowserToClose:
-            result = "No browser view to close."
+            result = "There’s no browser view to close."
         }
         
         return result
