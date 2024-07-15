@@ -137,30 +137,11 @@ function openInExternalBrowser(url, success, error) {
 function close(success, error) {
   exec(success, error, "OSInAppBrowser", "close", [{}]);
 }
-function removeAllListeners() {
-  console.log("remove all listeners...");
-  exec(() => {
-  }, () => {
-  }, "OSInAppBrowser", "coolMethod", [{}]);
-}
-async function addListener(eventName, listenerFunc) {
-  console.log("add listener...");
-  exec(() => {
-  }, () => {
-  }, "OSInAppBrowser", "coolMethod", [{ eventName, listenerFunc }]);
-  return {
-    remove: () => {
-      return Promise.resolve();
-    }
-  };
-}
 module.exports = {
   openInWebView,
   openInExternalBrowser,
   openInSystemBrowser,
-  close,
-  removeAllListeners,
-  addListener
+  close
 };
 exports.AndroidAnimation = AndroidAnimation;
 exports.AndroidViewStyle = AndroidViewStyle;

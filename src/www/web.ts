@@ -62,25 +62,9 @@ function close(success: () => void, error: (error: PluginError) => void): void {
   exec(success, error, 'OSInAppBrowser', 'close', [{}])  
 }
 
-function removeAllListeners(): void {
-  console.log("remove all listeners...");
-  exec(()=>{}, () =>{}, 'OSInAppBrowser', 'coolMethod', [{}])
-}
-async function addListener(eventName: 'browserClosed' | 'browserPageLoaded', listenerFunc: () => void): Promise<PluginListenerHandle> {
-  console.log("add listener...");
-  exec(()=>{}, () =>{}, 'OSInAppBrowser', 'coolMethod', [{eventName, listenerFunc}])
-  return {
-    remove: () => {
-      return Promise.resolve();
-    }
-  }
-}
-
 module.exports = {
   openInWebView,
   openInExternalBrowser,
   openInSystemBrowser,
-  close,
-  removeAllListeners,
-  addListener
+  close
 }
