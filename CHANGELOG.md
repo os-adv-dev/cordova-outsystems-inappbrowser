@@ -28,3 +28,4 @@ The changes documented here do not include those from the original repository.
 - Add `OpenInExternalBrowser`'s features on Android (https://outsystemsrd.atlassian.net/browse/RMET-3422).
 - Add `OpenInExternalBrowser` on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3421).
 - [Bridge] Adds cordova bridge, with types (https://outsystemsrd.atlassian.net/browse/RMET-3419).
+- Add content to `README` (https://outsystemsrd.atlassian.net/browse/RMET-3473).
