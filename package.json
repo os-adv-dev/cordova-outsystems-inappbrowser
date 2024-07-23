@@ -15,7 +15,10 @@
     ]
   },
   "scripts": {
-    "build": "rimraf ./dist && vite build"
+    "build": "rimraf ./dist && vite build",
+    "update:tag": "node ./scripts/change-extensibility.js",
+    "update:version": "node ./scripts/tag-applications-o11.js",
+    "deploy": "node ./scripts/deploy.js"
   },
   "engines": [],
   "devDependencies": {
