@@ -1,42 +1,4 @@
-async function getEnvironmentKey(base, env, auth){
-    let url =  `${base}/environments`;
-    
-    let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: auth
-        }
-    })
-
-    if(response.ok && response.status == 200){
-        let list = await response.json();
-        return (list.filter((detail) => detail.Name == env)[0]).Key
-    }
-
-    console.log(response.status)
-    let answer  = await response.text()
-    console.log(answer)
-    throw Error("Couldn't get environment key. Please check logs for more info.")
-
-}
-
-async function getAppKey(base, pluginSpaceName, auth){
-    let url =  `${base}/applications?IncludeEnvStatus=true`;
-    
-    let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: auth
-        }
-    })
-    
-    if(response.ok && response.status == 200){
-        let list = await response.json();
-        
-        let app = list.filter((a) => a.Name == pluginSpaceName)[0];
-        return app.Key
-    }
-}
+const utils = require('./utils')
 
 async function getModules(base, pluginKey, inEnv, auth){
     let url =  `${base}/environments/${inEnv}/applications/${pluginKey}?IncludeEnvStatus=true&IncludeModules=true`;
@@ -51,26 +13,6 @@ async function getModules(base, pluginKey, inEnv, auth){
     if(response.ok && response.status == 200){
         let app = await response.json();
         return app.AppStatusInEnvs[0].ModuleStatusInEnvs.map((m) => m.ModuleVersionKey )
-    }
-}
-
-
-async function getLatestAppVersion(base, appKey, auth) {
-    let url =  `${base}/applications/${appKey}/versions`;
-    
-    let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: auth
-        }
-    })
-
-    if(response.ok && response.status == 200){
-        let list = await response.json();
-        
-        if(list.length > 0)
-            return list[0].Version;
-        return '1.0.0';
     }
 }
 
@@ -106,14 +48,14 @@ async function createVersion(base, appKey, inEnv, version, modules, auth){
 }
 
 async function tagApp(baseURL, pluginSpaceName, auth){
-    let fromKey = await getEnvironmentKey(baseURL, "Development", auth);
-    let pluginKey = await getAppKey(baseURL, pluginSpaceName, auth);
+    let fromKey = await utils.getEnvironmentKey(baseURL, "Development", auth);
+    let pluginKey = await utils.getAppKey(baseURL, pluginSpaceName, auth);
     console.log(`plugin key: ${pluginKey}`);
 
     let modules = await getModules(baseURL, pluginKey, fromKey, auth);
     console.log(modules)
 
-    let version = await getLatestAppVersion(baseURL,pluginKey, auth);
+    let version = await utils.getLatestAppVersion(baseURL,pluginKey, auth);
     console.log(`last tagged version: ${version}`);
 
     let [_, major, minor, patch] = version.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/) ?? []; 

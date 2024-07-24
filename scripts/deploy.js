@@ -1,21 +1,4 @@
-const utils = require('./utils')
-
-async function getEnvironmentKey(base, env, auth){
-    let url =  `${base}/environments`;
-    
-    let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: auth
-        }
-    })
-
-    if(response.ok && response.status == 200){
-        let list = await response.json();
-        return (list.filter((detail) => detail.Name == env)[0]).Key
-    }
-}
+const utils = require('./utils');
 
 async function getLatestTagKey(base, pluginKey, auth){
     let url =  `${base}/applications/${pluginKey}/versions`;
@@ -138,8 +121,8 @@ baseURL = `https://${baseURL}/lifetimeapi/rest/v2`;
 startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceName, basicAuthentication);
 
 async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceName, auth){
-   let fromKey = await getEnvironmentKey(baseURL, fromEnvironment, auth);
-   let toKey = await getEnvironmentKey(baseURL, toEnvironment, auth);
+   let fromKey = await utils.getEnvironmentKey(baseURL, fromEnvironment, auth);
+   let toKey = await utils.getEnvironmentKey(baseURL, toEnvironment, auth);
 
    let pluginKey = await utils.getAppKey(baseURL, pluginSpaceName, auth);
    console.log(`plugin key: ${pluginKey}`)
@@ -167,6 +150,3 @@ async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceN
 
 
 }
-
-
-

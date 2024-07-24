@@ -1,0 +1,48 @@
+name: Github Release
+
+on:
+  workflow_call:  
+    inputs:
+      tag: 
+        required: true
+        type: string
+      plugin: 
+        description: 'Plugin'
+        required: true
+        type: string
+      environment:
+        description: 'The O11 environment we are downloading from'
+        required: true
+        type: string
+      notes:
+        description: 'The release notes'
+        required: true
+        type: string
+
+jobs:    
+  download:
+    name: '📦 Download OAP'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: '⬇️ Download the O11 OAP from LifeTime'
+      id: download_file
+      run: npm run download --plugin=${{inputs.plugin}} --environment=${{inputs.environment}} --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
+
+    - name: '🚀 Create GitHub Release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ls
+        ls downloads
+        gh release create ${{ inputs.tag }} './downloads/asset.oap' -t "${{inputs.tag}}" -n "${{inputs.notes}}" --latest=false 
