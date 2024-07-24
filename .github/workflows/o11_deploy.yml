@@ -12,7 +12,6 @@ on:
         required: true
         default: Testing
         type: string
-
       from:
         description: 'Source O11 Enviorment'
         required: true

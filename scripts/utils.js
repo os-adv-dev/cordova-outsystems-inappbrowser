@@ -11,8 +11,13 @@ async function getEnvironmentKey(base, env, auth){
 
     if(response.ok && response.status == 200){
         let list = await response.json();
-        return (list.filter((detail) => detail.Name == env)[0]).Key
+        return (list.filter((detail) => detail.Name == env)[0]).Key;
     }
+
+    
+    let error  = await response.text();
+    console.error(error);
+    throw Error("Couldn't get environment key. Please check logs for more info.");
 }
 
 async function getAppKey(base, pluginSpaceName, auth){
@@ -23,14 +28,17 @@ async function getAppKey(base, pluginSpaceName, auth){
         headers: {
             Authorization: auth
         }
-    })
+    });
     
     if(response.ok && response.status == 200){
         let list = await response.json();
-        
         let app = list.filter((a) => a.Name == pluginSpaceName)[0];
         return app.Key
     }
+
+    let error = response.text();
+    console.error(error);
+    throw Error("Couldn't retrieve app key. :(");
 }
 
 async function getLatestAppVersion(base, appKey, auth) {
@@ -41,7 +49,7 @@ async function getLatestAppVersion(base, appKey, auth) {
         headers: {
             Authorization: auth
         }
-    })
+    });
 
     if(response.ok && response.status == 200){
         let list = await response.json();
@@ -50,9 +58,10 @@ async function getLatestAppVersion(base, appKey, auth) {
             return list[0].Version;
         return '1.0.0';
     }
+
     let res = await response.text();
-    console.error(res)
-    throw Error ("Couldn't retrive app tag version.")
+    console.error(res);
+    throw Error ("Couldn't retrive app tag version.");
 }
 
 module.exports = {

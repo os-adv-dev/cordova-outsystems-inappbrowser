@@ -15,7 +15,10 @@ on:
         description: 'Minimum MABS version'
         required: true
         type: string
-
+      releaseNotes:
+        description: 'Release Notes'
+        required: true
+        type: string
 
 jobs:    
   change-extensibility:
@@ -23,13 +26,12 @@ jobs:
     name: Update OML Extensibility
     secrets: inherit
     with:
-      plugin:  BarcodeAutomation
+      plugin: BarcodeAutomation
       configName: InAppBrowser Plugin
       tag: ${{ github.event.inputs.tag }}
       forgeVersion: ${{ github.event.inputs.forgeVersion }}
       mabsMin: ${{ github.event.inputs.mabsMin }}
       environment: enmobile11-dev.outsystemsenterprise.com
-    
 
   deploy:
     name: Release plugin via LifeTime
@@ -61,4 +63,15 @@ jobs:
     
     - name: Deploying from TST to PROD 
       run: npm run deploy --plugin=BarcodeAutomation --from=Testing --to=Production --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
-    
+  
+  release:
+    uses: ./.github/workflows/o11_github_release.yml
+    name: Create Github release
+    secrets: inherit
+    needs: deploy
+    with:
+      tag: ${{ github.event.inputs.tag }}
+      environment: Production
+      plugin: BarcodeAutomation
+      notes: ${{ github.event.inputs.releaseNotes }}
+
