@@ -13,7 +13,7 @@ sealed class OSInAppBrowserError(val code: String, val message: String) {
 
     data object CloseFailed : OSInAppBrowserError(
         code = 12.formatErrorCode(),
-        message = "There’s no browser view to close."
+        message = "There's no browser view to close."
     )
 }
 

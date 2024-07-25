@@ -9,6 +9,7 @@ The changes documented here do not include those from the original repository.
 ## [1.0.0]
 
 ### Features
+- Add `Close` feature for WebView and System Browser on Android (https://outsystemsrd.atlassian.net/browse/RMET-3428).
 - Add error codes and messages on iOS (https://outsystemsrd.atlassian.net/browse/RMET-3465).
 - Format error codes and messages on Android (https://outsystemsrd.atlassian.net/browse/RMET-3466).
 - Add permissions requests and opening file chooser to `OpenInWebView` feature on Android (https://outsystemsrd.atlassian.net/browse/RMET-3534).

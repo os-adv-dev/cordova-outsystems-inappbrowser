@@ -5,6 +5,8 @@ import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABEngine
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABAnimation
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABCustomTabsOptions
 import androidx.lifecycle.lifecycleScope
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABClosable
+import com.outsystems.plugins.inappbrowser.osinappbrowserlib.OSIABRouter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.helpers.OSIABFlowHelper
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABToolbarPosition
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABViewStyle
@@ -22,6 +24,7 @@ import org.json.JSONObject
 
 class OSInAppBrowser: CordovaPlugin() {
     private var engine: OSIABEngine? = null
+    private var activeRouter: OSIABRouter<Boolean>? = null
     private val gson by lazy { Gson() }
 
     override fun initialize(cordova: CordovaInterface, webView: CordovaWebView) {
@@ -43,6 +46,9 @@ class OSInAppBrowser: CordovaPlugin() {
             }
             "openInWebView" -> {
                 openInWebView(args, callbackContext)
+            }
+            "close" -> {
+                close(callbackContext)
             }
         }
         return true
@@ -103,23 +109,27 @@ class OSInAppBrowser: CordovaPlugin() {
         }
 
         try {
-            val customTabsRouter = OSIABCustomTabsRouterAdapter(
-                context = cordova.context,
-                lifecycleScope = cordova.activity.lifecycleScope,
-                options = customTabsOptions,
-                onBrowserPageLoaded = {
-                    sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
-                },
-                onBrowserFinished = {
-                    sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
-                }
-            )
+            close {
+                val customTabsRouter = OSIABCustomTabsRouterAdapter(
+                    context = cordova.context,
+                    lifecycleScope = cordova.activity.lifecycleScope,
+                    options = customTabsOptions,
+                    flowHelper = OSIABFlowHelper(),
+                    onBrowserPageLoaded = {
+                        sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
+                    },
+                    onBrowserFinished = {
+                        sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
+                    }
+                )
 
-            engine?.openCustomTabs(customTabsRouter, url) { success ->
-                if (success) {
-                    sendSuccess(callbackContext, OSIABEventType.SUCCESS)
-                } else {
-                    sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.SYSTEM_BROWSER))
+                engine?.openCustomTabs(customTabsRouter, url) { success ->
+                    if (success) {
+                        activeRouter = customTabsRouter
+                        sendSuccess(callbackContext, OSIABEventType.SUCCESS)
+                    } else {
+                        sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.SYSTEM_BROWSER))
+                    }
                 }
             }
         }
@@ -149,30 +159,58 @@ class OSInAppBrowser: CordovaPlugin() {
         }
 
         try {
-            val webViewRouter = OSIABWebViewRouterAdapter(
-                cordova.context,
-                cordova.activity.lifecycleScope,
-                webViewOptions,
-                OSIABFlowHelper(),
-                onBrowserPageLoaded = {
-                    sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
-                },
-                onBrowserFinished = {
-                    sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
-                }
-            )
+            close {
+                val webViewRouter = OSIABWebViewRouterAdapter(
+                    context = cordova.context,
+                    lifecycleScope = cordova.activity.lifecycleScope,
+                    options = webViewOptions,
+                    flowHelper = OSIABFlowHelper(),
+                    onBrowserPageLoaded = {
+                        sendSuccess(callbackContext, OSIABEventType.BROWSER_PAGE_LOADED)
+                    },
+                    onBrowserFinished = {
+                        sendSuccess(callbackContext, OSIABEventType.BROWSER_FINISHED)
+                    }
+                )
 
-            engine?.openWebView(webViewRouter, url) { success ->
-                if (success) {
-                    sendSuccess(callbackContext, OSIABEventType.SUCCESS)
-                } else {
-                    sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.WEB_VIEW))
+                engine?.openWebView(webViewRouter, url) { success ->
+                    if (success) {
+                        activeRouter = webViewRouter
+                        sendSuccess(callbackContext, OSIABEventType.SUCCESS)
+                    } else {
+                        sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.WEB_VIEW))
+                    }
                 }
             }
         }
         catch (e: Exception) {
             sendError(callbackContext, OSInAppBrowserError.OpenFailed(url, OSInAppBrowserTarget.WEB_VIEW))
         }
+    }
+
+    /**
+     * Calls the close method of OSIABEngine to close the currently opened view
+     * @param callbackContext CallbackContext the method should return to
+     */
+    private fun close(callbackContext: CallbackContext) {
+        close { success ->
+            if (success) {
+                sendSuccess(callbackContext, OSIABEventType.SUCCESS)
+            } else {
+                sendError(callbackContext, OSInAppBrowserError.CloseFailed)
+            }
+        }
+    }
+
+    private fun close(callback: (Boolean) -> Unit) {
+        (activeRouter as? OSIABClosable)?.let { closableRouter ->
+            closableRouter.close { success ->
+                if (success) {
+                    activeRouter = null
+                }
+                callback(success)
+            }
+        } ?: callback(false)
     }
 
     /**
