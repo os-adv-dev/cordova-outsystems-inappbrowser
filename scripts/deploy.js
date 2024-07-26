@@ -29,7 +29,6 @@ async function createDeploymentPlan(base, fromEnv, toEnv, pluginKey, auth) {
             }
         ] 
 	};
-    console.log(body)
 
     const response = await fetch(url, {
         method: "POST", 
@@ -43,7 +42,6 @@ async function createDeploymentPlan(base, fromEnv, toEnv, pluginKey, auth) {
     
     if(response.ok && response.status == 201){
         let key = await response.text()
-        console.log("Deployment Response:" + key);
         return key;
     }
 }
@@ -93,7 +91,7 @@ async function isFinished(base, deployKey, auth) {
             return true
         }
         if(status.DeploymentStatus == 'finished_successful'){
-            console.log("Finished with warnings");
+            console.log("Finished successfully!");
             return true
         }
         
@@ -125,16 +123,13 @@ async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceN
    let toKey = await utils.getEnvironmentKey(baseURL, toEnvironment, auth);
 
    let pluginKey = await utils.getAppKey(baseURL, pluginSpaceName, auth);
-   console.log(`plugin key: ${pluginKey}`)
    
    let version = await utils.getLatestAppVersion(baseURL, pluginKey, auth);
    console.log(`version to deploy: ${version}`)
 
    let tagKey = await getLatestTagKey(baseURL, pluginKey, auth);
-   console.log(`tagged app key: ${tagKey}`)
 
    let deploymentKey = await createDeploymentPlan(baseURL, fromKey, toKey, tagKey, auth);
-   console.log("deployment key: " + deploymentKey)
 
    //TODO: check for conflicts + slack message for approval if conflicts were found
    await startDeployment(baseURL, deploymentKey, auth);

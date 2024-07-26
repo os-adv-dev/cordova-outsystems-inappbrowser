@@ -17,20 +17,19 @@ if(process.env.npm_config_authentication == null) {
 }
 let basicAuthentication = process.env.npm_config_authentication;
 
-let url = "https://" + environment + "/CodeUpdater/rest/Bulk/ExtensabilityUpdate";
+let url = `https://${environment}/CodeUpdater/rest/Bulk/ExtensabilityUpdate`;
 
 let extensibilityChangeJson = {
     plugin :{
         url: `https://${repository}#${branch}`,
     },
     metadata: { 
-        "mabs-min": mabsMin ? mabsMin : "9.0.0",
+        "mabs-min": mabsMin ? mabsMin : "10.0.0",
         name: metadata, 
         version: pluginForgeVersion
     }
 }
 
-console.log(extensibilityChangeJson);
 let extensibilityChangeString = JSON.stringify(extensibilityChangeJson, null, '\t');
 let buffer = new Buffer.from(extensibilityChangeString);
 let base64 = buffer.toString('base64');
@@ -41,13 +40,10 @@ let body = [{
 }];
 
 console.log(
-    "Started changing extensibility in module " + pluginSpaceName + 
-    ".\n -- Extensibility will be configured to: " + extensibilityChangeJson.plugin.url +
-    `\n with forge version ${pluginForgeVersion} and mabs min ${mabsMin}`  +
-    "\nin environment:" + environment     
+    `Started changing extensibility in module ${pluginSpaceName}.\n` + 
+    `-- Extensibility will be configured to:  ${extensibilityChangeString}\n` +
+    `in environment: ${environment}`
 );
-
-
 
 async function updateOML() {
     const response = await fetch(url, {
@@ -58,7 +54,7 @@ async function updateOML() {
           "Content-Type": "application/json",
           Authorization: basicAuthentication
         },
-        body: JSON.stringify(body), // body data type must match "Content-Type" header
+        body: JSON.stringify(body)
       })
       
         if(response.ok && response.status == 200){

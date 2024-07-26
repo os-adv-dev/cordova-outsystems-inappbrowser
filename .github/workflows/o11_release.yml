@@ -53,13 +53,13 @@ jobs:
       run: npm run update:version --plugin=BarcodeAutomation --lifetime=${{ secrets.LIFETIME}} --authentication='${{secrets.AUTOMATION_TOKEN}}'
 
     - name: Wait for tag version to propagate
-      run: sleep 20  # Waits for 10 seconds
+      run: sleep 20  # Waits for 20 seconds
 
     - name: Deploying from DEV to TST
       run: npm run deploy --plugin=BarcodeAutomation --from=Development --to=Testing --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
 
     - name: Wait for deployment to propagate
-      run: sleep 20  # Waits for 10 seconds
+      run: sleep 20  # Waits for 20 seconds
     
     - name: Deploying from TST to PROD 
       run: npm run deploy --plugin=BarcodeAutomation --from=Testing --to=Production --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'

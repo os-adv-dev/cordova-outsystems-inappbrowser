@@ -50,10 +50,8 @@ async function createVersion(base, appKey, inEnv, version, modules, auth){
 async function tagApp(baseURL, pluginSpaceName, auth){
     let fromKey = await utils.getEnvironmentKey(baseURL, "Development", auth);
     let pluginKey = await utils.getAppKey(baseURL, pluginSpaceName, auth);
-    console.log(`plugin key: ${pluginKey}`);
 
     let modules = await getModules(baseURL, pluginKey, fromKey, auth);
-    console.log(modules)
 
     let version = await utils.getLatestAppVersion(baseURL,pluginKey, auth);
     console.log(`last tagged version: ${version}`);
@@ -62,8 +60,7 @@ async function tagApp(baseURL, pluginSpaceName, auth){
     let newVersion = `${major}.${minor}.${parseInt(patch) + 1}`;
     console.log(`next version: ${newVersion}`);
     
-    let appKey = await createVersion(baseURL, pluginKey, fromKey, newVersion, modules, auth);
-    console.log(`new plugin version tag created, app key is ${appKey}`)
+    await createVersion(baseURL, pluginKey, fromKey, newVersion, modules, auth);
 }
 
 
