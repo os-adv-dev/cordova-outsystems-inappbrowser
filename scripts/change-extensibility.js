@@ -21,7 +21,7 @@ let url = "https://" + environment + "/CodeUpdater/rest/Bulk/ExtensabilityUpdate
 
 let extensibilityChangeJson = {
     plugin :{
-        url: `https://${repository}#${branch}`,
+        url: `https://github.com/${repository}#${branch}`,
     },
     metadata: { 
         "mabs-min": mabsMin ? mabsMin : "10.0.0",

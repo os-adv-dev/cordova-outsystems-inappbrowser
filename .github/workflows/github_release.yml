@@ -66,6 +66,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ls
-        ls downloads
-        gh release create ${{ inputs.tag }} ./downloads/*.* -t "${{inputs.tag}}" -n "${{inputs.notes}}" --latest=false 
+        echo "📝 Extracting release notes"
+        sh scripts/extract_release_notes.sh "${{ inputs.tag }}" >> release_notes.md
+        RELEASE_NOTES="$(cat release_notes.md)"
+        echo "🚀 Creating release"
+        gh release create ${{ inputs.tag }} ./downloads/*.* -t "${{inputs.tag}}" -n "$RELEASE_NOTES"
