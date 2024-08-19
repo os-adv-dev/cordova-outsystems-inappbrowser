@@ -40,6 +40,13 @@
         <source-file src="src/ios/OSInAppBrowserError.swift" />
         <source-file src="src/ios/OSInAppBrowserInputArgumentsModel.swift" />
 
-        <framework src="src/ios/OSInAppBrowserLib.xcframework" embed="true" custom="true" />
+        <podspec>
+            <config>
+                <source url="https://cdn.cocoapods.org/"/>
+            </config>
+            <pods use-frameworks="true">
+                <pod name="OSInAppBrowserLib" spec="1.0.0" />
+            </pods>
+        </podspec> 
     </platform>
 </plugin>
