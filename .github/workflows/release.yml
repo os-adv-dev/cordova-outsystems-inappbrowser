@@ -30,7 +30,7 @@ jobs:
     name: '✍🏻 Update O11 OML Extensibility'
     secrets: inherit
     with:
-      plugin: BarcodeAutomation
+      plugin: InAppBrowserPlugin
       configName: InAppBrowser Plugin
       tag: ${{ github.event.inputs.tag }}
       forgeVersion: ${{ github.event.inputs.forgeVersionO11 }}
