@@ -41,7 +41,7 @@ jobs:
               azcliversion: latest
               inlineScript: | 
                 echo "${{ secrets.AZURE_DEVOPS_TOKEN }}" | az devops login --organization https://dev.azure.com/OutSystemsRD
-                PIPELINE_ID=$(az pipelines run --name OutSystems.cordova-outsystems-inappbrowser --organization https://dev.azure.com/OutSystemsRD --project "Mobile Supported Plugins" --branch feat/RMET-3440/add-odc-automations --parameters "pluginURL=https://github.com/${{ github.repository }}#${{ inputs.tag }}" "forgeVersion=${{ inputs.forgeVersion }}" "releaseNotes=${{ inputs.releaseNotes }}" "mabs=${{ inputs.mabsMin }}" "pluginKey=${{ inputs.odcPluginKey }}" --output tsv --query id)
+                PIPELINE_ID=$(az pipelines run --name OutSystems.cordova-outsystems-inappbrowser --organization https://dev.azure.com/OutSystemsRD --project "Mobile Supported Plugins" --branch main --parameters "pluginURL=https://github.com/${{ github.repository }}#${{ inputs.tag }}" "forgeVersion=${{ inputs.forgeVersion }}" "releaseNotes=${{ inputs.releaseNotes }}" "mabs=${{ inputs.mabsMin }}" "pluginKey=${{ inputs.odcPluginKey }}" --output tsv --query id)
                 echo "PIPELINE_ID=$PIPELINE_ID" >> $GITHUB_ENV
         
         - name: '⏳ Wait for build to end'
