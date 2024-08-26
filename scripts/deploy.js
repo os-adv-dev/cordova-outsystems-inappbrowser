@@ -1,4 +1,6 @@
 const utils = require('./utils');
+const fs = require("fs");
+const { Readable } = require('stream');
 
 async function getLatestTagKey(base, pluginKey, auth){
     let url =  `${base}/applications/${pluginKey}/versions`;
@@ -17,27 +19,15 @@ async function getLatestTagKey(base, pluginKey, auth){
     }
 }
 
-async function createDeploymentPlan(base, fromEnv, toEnv, pluginKey, auth) {
-	let url =  `${base}/deployments`
-	let body = {
-        Notes: "Deployment triggered by github workflow",
-	    SourceEnvironmentKey: fromEnv,
-	    TargetEnvironmentKey: toEnv,
-	    ApplicationOperations:[
-            {
-                ApplicationVersionKey: pluginKey
-            }
-        ] 
-	};
-    console.log(body)
-
+async function createDeploymentPlan(base, toEnv, file, auth) {
+	let url =  `${base}/environments/${toEnv}/deployment/`
     const response = await fetch(url, {
         method: "POST", 
         headers: {
-            "Content-Type": "application/json",
             Authorization: auth
         },
-        body: JSON.stringify(body)
+        body: file,
+        duplex: 'half'
     })
     
     
@@ -46,6 +36,8 @@ async function createDeploymentPlan(base, fromEnv, toEnv, pluginKey, auth) {
         console.log("Deployment Response:" + key);
         return key;
     }
+    let error = await response.text();
+    throw Error(`Couldn't create a binary deployment, with error: ${error}`)
 }
 
 async function startDeployment(base, deployKey, auth){
@@ -61,6 +53,18 @@ async function startDeployment(base, deployKey, auth){
     
     if(response.ok && response.status == 202){ 
         console.log("Deployment Started Successfully!");   
+    }else {
+        let res = await response.json();
+        console.log(res);
+        let url = `${base}/deployments/${deployKey}/status`;
+        let status = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: auth
+            }
+        })
+        throw Error (`!! Something while starting the deployment: status is ${status}, with error ${res}`);
     }
 }
 
@@ -98,7 +102,8 @@ async function isFinished(base, deployKey, auth) {
         }
         
     }
-    throw Error ("!! Something went wrong with the request: " + await res.json());
+    let error = await res.json();
+    throw Error ("!! Something went wrong with the request: " + error);
 }
 
 
@@ -133,7 +138,10 @@ async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceN
    let tagKey = await getLatestTagKey(baseURL, pluginKey, auth);
    console.log(`tagged app key: ${tagKey}`)
 
-   let deploymentKey = await createDeploymentPlan(baseURL, fromKey, toKey, tagKey, auth);
+   let downloadURL = await utils.requestDownloadURL(baseURL, fromKey, pluginKey, auth);
+   let file = await utils.download(downloadURL, auth)
+
+   let deploymentKey = await createDeploymentPlan(baseURL, toKey, file, auth);
    console.log("deployment key: " + deploymentKey)
 
    //TODO: check for conflicts + slack message for approval if conflicts were found

@@ -1,3 +1,10 @@
+const fs = require("fs");
+const { finished } = require('stream/promises');
+const { Readable } = require('stream');
+const path = require("path");
+
+const DOWNLOAD_FOLDER = "downloads";
+
 async function getEnvironmentKey(base, env, auth){
     let url =  `${base}/environments`;
     
@@ -64,8 +71,59 @@ async function getLatestAppVersion(base, appKey, auth) {
     throw Error ("Couldn't retrive app tag version.");
 }
 
+async function download(url, auth) {
+
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            Authorization: auth
+        }
+    })
+
+    if(!response.ok || response.status != 200) {
+      let error = await response.text();
+      console.error(error);
+      throw Error("Couldn't download file :(((.")
+    }
+    let file =  response.body;
+
+    return file;
+}
+
+async function save(file, fileName) {
+    if (!fs.existsSync(DOWNLOAD_FOLDER)){
+		console.log("Create downloads folder: " + DOWNLOAD_FOLDER);
+		fs.mkdirSync(DOWNLOAD_FOLDER);
+	}
+    
+    const destination = path.resolve(`./${DOWNLOAD_FOLDER}/${fileName}`);
+    const fileStream = fs.createWriteStream(destination, { flags: 'wx' });
+    await finished(Readable.fromWeb(file).pipe(fileStream));
+    console.log(`Finifhed writing to ${destination}`);
+}
+
+async function requestDownloadURL(baseURL, envKey, pluginKey, auth) {
+    let downloadEndpoint = `${baseURL}/environments/${envKey}/applications/${pluginKey}/content`
+    const response = await fetch(downloadEndpoint, {
+        method: 'GET',
+        headers: {
+            Authorization: auth
+        }
+    })
+    if(response.ok && response.status == 200){
+        let downloadInfo = await response.json()
+        return downloadInfo.url
+    } 
+
+    let error = await response.text();
+    throw Error(`Couldn't get download url, because of ${error}`);
+}
+
 module.exports = {
     getAppKey,
     getEnvironmentKey,
-    getLatestAppVersion
+    getLatestAppVersion,
+    download,
+    requestDownloadURL,
+    save
 }

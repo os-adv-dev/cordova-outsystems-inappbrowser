@@ -25,7 +25,7 @@ on:
         type: string
 
 jobs:    
-  change-extensibility:
+  change_extensibility:
     uses: ./.github/workflows/o11_change_extensibility.yml
     name: '✍🏻 Update O11 OML Extensibility'
     secrets: inherit
@@ -38,36 +38,11 @@ jobs:
       environment: enmobile11-dev.outsystemsenterprise.com
 
   deploy_o11:
-    name: '🔌 Deploy plugin across LifeTime'
-    runs-on: ubuntu-latest
-    needs: change-extensibility
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    uses: ./.github/workflows/o11_release.yml
+    secrets: inherit
+    with:
+      plugin: InAppBrowser Plugin
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Tag Plugin with Version 
-      run: npm run update:version --plugin="InAppBrowser Plugin" --lifetime=${{ secrets.LIFETIME}} --authentication='${{secrets.AUTOMATION_TOKEN}}'
-
-    - name: ⏳ Wait for tag version to propagate
-      run: sleep 20  # Waits for 20 seconds
-
-    - name: Deploying from DEV to TST
-      run: npm run deploy --plugin="InAppBrowser Plugin" --from=Development --to=Testing --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
-
-    - name: ⏳ Wait for deployment to propagate
-      run: sleep 20  # Waits for 20 seconds
-    
-    - name: Deploying from TST to PROD 
-      run: npm run deploy --plugin="InAppBrowser Plugin" --from=Testing --to=Production --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
-  
   deploy_odc:
     name: '🔌  Update ODC OML Extensibility & Tenant Release'
     uses: ./.github/workflows/odc_release.yml
