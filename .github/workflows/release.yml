@@ -64,7 +64,7 @@ jobs:
     with:
       tag: ${{ github.event.inputs.tag }}
       environment: Production
-      plugin: InAppBrowserPlugin
+      plugin: InAppBrowser Plugin
       notes: ${{ github.event.inputs.releaseNotes }}
       pipelineID: ${{ needs.deploy_odc.outputs.pipelineID }}
       forgeVersionO11: ${{ github.event.inputs.forgeVersionO11 }}

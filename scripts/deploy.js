@@ -20,20 +20,22 @@ async function getLatestTagKey(base, pluginKey, auth){
 }
 
 async function createDeploymentPlan(base, toEnv, file, auth) {
+    
 	let url =  `${base}/environments/${toEnv}/deployment/`
+    let data = new Uint8Array(await new Response(file).arrayBuffer());
+    let blob = new Blob([data],{type:'application/octet-binary'});
     const response = await fetch(url, {
         method: "POST", 
         headers: {
-            Authorization: auth
+            Authorization: auth,
+            'Content-Type': 'application/octet-stream'
         },
-        body: file,
-        duplex: 'half'
+        body:  blob
+        
     })
-    
     
     if(response.ok && response.status == 201){
         let key = await response.text()
-        console.log("Deployment Response:" + key);
         return key;
     }
     let error = await response.text();
@@ -52,7 +54,7 @@ async function startDeployment(base, deployKey, auth){
     })
     
     if(response.ok && response.status == 202){ 
-        console.log("Deployment Started Successfully!");   
+        console.log("Deployment Started Successfully 🚀!");   
     }else {
         let res = await response.json();
         console.log(res);
@@ -82,28 +84,28 @@ async function isFinished(base, deployKey, auth) {
     if(res.ok && res.status == 200){
         let status = await res.json()
         if(status.DeploymentStatus == 'running'){
-            console.log("Still running...");
+            console.log("Still running ⏳...");
             return false
         } 
         if(status.DeploymentStatus == 'aborted'){
-            throw Error ("!! Deployment aborted !!");
+            throw Error ("!! 🚨 Deployment aborted  🚨!!");
         }
         if(status.DeploymentStatus == 'finished_with_errors'){
-            throw Error ("!! Something went wrong with the deployment: finished with errors. Please check lifetime !!");
+            throw Error ("!! 🚨 Something went wrong with the deployment: finished with errors. Please check lifetime !!");
         }
 
         if(status.DeploymentStatus == 'finished_with_warnings'){
-            console.log("Finished with warnings");
+            console.log("🚧 Finished with warnings");
             return true
         }
         if(status.DeploymentStatus == 'finished_successful'){
-            console.log("Finished with success");
+            console.log("Finished with success 🚀");
             return true
         }
         
     }
     let error = await res.json();
-    throw Error ("!! Something went wrong with the request: " + error);
+    throw Error ("!! 🚨 Something went wrong with the request: " + error);
 }
 
 
@@ -128,23 +130,23 @@ startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceName, basicAuthe
 async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceName, auth){
    let fromKey = await utils.getEnvironmentKey(baseURL, fromEnvironment, auth);
    let toKey = await utils.getEnvironmentKey(baseURL, toEnvironment, auth);
+   console.log(`target key: ${toKey}`);
 
    let pluginKey = await utils.getAppKey(baseURL, pluginSpaceName, auth);
-   console.log(`plugin key: ${pluginKey}`)
+   console.log(`plugin key: ${pluginKey}`);
    
    let version = await utils.getLatestAppVersion(baseURL, pluginKey, auth);
-   console.log(`version to deploy: ${version}`)
+   console.log(`version to deploy: ${version}`);
 
    let tagKey = await getLatestTagKey(baseURL, pluginKey, auth);
-   console.log(`tagged app key: ${tagKey}`)
+   console.log(`tagged app key: ${tagKey}`);
 
    let downloadURL = await utils.requestDownloadURL(baseURL, fromKey, pluginKey, auth);
-   let file = await utils.download(downloadURL, auth)
+   let file = await utils.download(downloadURL, auth);
 
    let deploymentKey = await createDeploymentPlan(baseURL, toKey, file, auth);
-   console.log("deployment key: " + deploymentKey)
+   console.log(`deployment key ${deploymentKey}`);
 
-   //TODO: check for conflicts + slack message for approval if conflicts were found
    await startDeployment(baseURL, deploymentKey, auth);
    
    let intervalId = setInterval(async () => {
@@ -155,6 +157,4 @@ async function startDeploy(baseURL, fromEnvironment, toEnvironment, pluginSpaceN
             clearInterval(intervalId);
         }
    }, 10000)
-
-
 }
