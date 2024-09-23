@@ -39,6 +39,8 @@ jobs:
 
   deploy_o11:
     uses: ./.github/workflows/o11_release.yml
+    needs:
+      - change_extensibility
     secrets: inherit
     with:
       plugin: InAppBrowser Plugin
