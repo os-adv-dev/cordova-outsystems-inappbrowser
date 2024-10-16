@@ -49,7 +49,7 @@ jobs:
 
     - name: '⬇️ Download the O11 OAP from LifeTime'
       id: download_file
-      run: npm run download --plugin=${{inputs.plugin}} --forge=${{inputs.forgeVersionO11}} --environment=${{inputs.environment}} --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
+      run: npm run download --plugin="${{inputs.plugin}}" --forge=${{inputs.forgeVersionO11}} --environment=${{inputs.environment}} --lifetime=${{ secrets.LIFETIME }} --authentication='${{ secrets.AUTOMATION_TOKEN }}'
 
       
     - name: '⬇️ Download OML from Azure'
