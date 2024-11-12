@@ -14,10 +14,6 @@ import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSIABWebView
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABCustomTabsRouterAdapter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABExternalBrowserRouterAdapter
 import com.outsystems.plugins.inappbrowser.osinappbrowserlib.routeradapters.OSIABWebViewRouterAdapter
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSInAppBrowserError
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSInAppBrowserSystemBrowserInputArguments
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSInAppBrowserTarget
-import com.outsystems.plugins.inappbrowser.osinappbrowserlib.models.OSInAppBrowserWebViewInputArguments
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
 import org.apache.cordova.CordovaPlugin
