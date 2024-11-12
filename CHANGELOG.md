@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The changes documented here do not include those from the original repository.
 
+## Unreleased
+
+### Features
+- Handle Edge-to-Edge on all Android versions.
+
 ## 1.0.2
 - Android: Fix issue where the custom tabs browser wasn't being closed when navigating back to the app
 - Android: Fix race condition that caused the `BrowserFinished` event to not be fired in some instances with the system browser
