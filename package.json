@@ -1,6 +1,6 @@
 {
   "name": "com.outsystems.plugins.inappbrowser",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "InAppBrowser OutSystems Cordova Plugin",
   "keywords": [
     "ecosystem:cordova",

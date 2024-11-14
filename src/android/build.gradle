@@ -9,7 +9,6 @@ buildscript {
     }
 }
 
-apply plugin: 'kotlin-kapt'
 allprojects {
     repositories {
         maven { url 'https://pkgs.dev.azure.com/OutSystemsRD/9e79bc5b-69b2-4476-9ca5-d67594972a52/_packaging/PublicArtifactRepository/maven/v1' }
@@ -17,7 +16,7 @@ allprojects {
 }
 
 dependencies{
-    implementation("com.github.outsystems:osinappbrowser-android:1.0.2@aar")
+    implementation("com.github.outsystems:osinappbrowser-android:1.1.0@aar")
 
     implementation("androidx.browser:browser:1.8.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
@@ -31,6 +30,7 @@ dependencies{
 
     // appcompact
     implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.activity:activity-ktx:1.9.3"
 
     // constraint layout
     implementation "androidx.constraintlayout:constraintlayout:2.2.0-alpha13"
