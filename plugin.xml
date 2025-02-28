@@ -45,7 +45,8 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="OSInAppBrowserLib" spec="1.0.0" />
+                <!--<pod name="OSInAppBrowserLib" spec="1.0.0" />-->
+                <pod name="OSInAppBrowserLib" source="https://github.com/OutSystems/OSInAppBrowserLib-iOS" />
             </pods>
         </podspec> 
     </platform>

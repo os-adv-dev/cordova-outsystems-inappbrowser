@@ -1,47 +1,48 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const cordova = require("cordova");
-var ToolbarPosition = /* @__PURE__ */ ((ToolbarPosition2) => {
-  ToolbarPosition2[ToolbarPosition2["TOP"] = 0] = "TOP";
-  ToolbarPosition2[ToolbarPosition2["BOTTOM"] = 1] = "BOTTOM";
-  return ToolbarPosition2;
-})(ToolbarPosition || {});
-var iOSViewStyle = /* @__PURE__ */ ((iOSViewStyle2) => {
-  iOSViewStyle2[iOSViewStyle2["PAGE_SHEET"] = 0] = "PAGE_SHEET";
-  iOSViewStyle2[iOSViewStyle2["FORM_SHEET"] = 1] = "FORM_SHEET";
-  iOSViewStyle2[iOSViewStyle2["FULL_SCREEN"] = 2] = "FULL_SCREEN";
-  return iOSViewStyle2;
-})(iOSViewStyle || {});
-var AndroidViewStyle = /* @__PURE__ */ ((AndroidViewStyle2) => {
-  AndroidViewStyle2[AndroidViewStyle2["BOTTOM_SHEET"] = 0] = "BOTTOM_SHEET";
-  AndroidViewStyle2[AndroidViewStyle2["FULL_SCREEN"] = 1] = "FULL_SCREEN";
-  return AndroidViewStyle2;
-})(AndroidViewStyle || {});
-var iOSAnimation = /* @__PURE__ */ ((iOSAnimation2) => {
-  iOSAnimation2[iOSAnimation2["FLIP_HORIZONTAL"] = 0] = "FLIP_HORIZONTAL";
-  iOSAnimation2[iOSAnimation2["CROSS_DISSOLVE"] = 1] = "CROSS_DISSOLVE";
-  iOSAnimation2[iOSAnimation2["COVER_VERTICAL"] = 2] = "COVER_VERTICAL";
-  return iOSAnimation2;
-})(iOSAnimation || {});
-var AndroidAnimation = /* @__PURE__ */ ((AndroidAnimation2) => {
-  AndroidAnimation2[AndroidAnimation2["FADE_IN"] = 0] = "FADE_IN";
-  AndroidAnimation2[AndroidAnimation2["FADE_OUT"] = 1] = "FADE_OUT";
-  AndroidAnimation2[AndroidAnimation2["SLIDE_IN_LEFT"] = 2] = "SLIDE_IN_LEFT";
-  AndroidAnimation2[AndroidAnimation2["SLIDE_OUT_RIGHT"] = 3] = "SLIDE_OUT_RIGHT";
-  return AndroidAnimation2;
-})(AndroidAnimation || {});
-var DismissStyle = /* @__PURE__ */ ((DismissStyle2) => {
-  DismissStyle2[DismissStyle2["CLOSE"] = 0] = "CLOSE";
-  DismissStyle2[DismissStyle2["CANCEL"] = 1] = "CANCEL";
-  DismissStyle2[DismissStyle2["DONE"] = 2] = "DONE";
-  return DismissStyle2;
-})(DismissStyle || {});
-var CallbackEvent = /* @__PURE__ */ ((CallbackEvent2) => {
-  CallbackEvent2[CallbackEvent2["SUCCESS"] = 1] = "SUCCESS";
-  CallbackEvent2[CallbackEvent2["PAGE_CLOSED"] = 2] = "PAGE_CLOSED";
-  CallbackEvent2[CallbackEvent2["PAGE_LOAD_COMPLETED"] = 3] = "PAGE_LOAD_COMPLETED";
-  return CallbackEvent2;
-})(CallbackEvent || {});
+exports.ToolbarPosition = void 0;
+(function(ToolbarPosition) {
+  ToolbarPosition[ToolbarPosition["TOP"] = 0] = "TOP";
+  ToolbarPosition[ToolbarPosition["BOTTOM"] = 1] = "BOTTOM";
+})(exports.ToolbarPosition || (exports.ToolbarPosition = {}));
+exports.iOSViewStyle = void 0;
+(function(iOSViewStyle) {
+  iOSViewStyle[iOSViewStyle["PAGE_SHEET"] = 0] = "PAGE_SHEET";
+  iOSViewStyle[iOSViewStyle["FORM_SHEET"] = 1] = "FORM_SHEET";
+  iOSViewStyle[iOSViewStyle["FULL_SCREEN"] = 2] = "FULL_SCREEN";
+})(exports.iOSViewStyle || (exports.iOSViewStyle = {}));
+exports.AndroidViewStyle = void 0;
+(function(AndroidViewStyle) {
+  AndroidViewStyle[AndroidViewStyle["BOTTOM_SHEET"] = 0] = "BOTTOM_SHEET";
+  AndroidViewStyle[AndroidViewStyle["FULL_SCREEN"] = 1] = "FULL_SCREEN";
+})(exports.AndroidViewStyle || (exports.AndroidViewStyle = {}));
+exports.iOSAnimation = void 0;
+(function(iOSAnimation) {
+  iOSAnimation[iOSAnimation["FLIP_HORIZONTAL"] = 0] = "FLIP_HORIZONTAL";
+  iOSAnimation[iOSAnimation["CROSS_DISSOLVE"] = 1] = "CROSS_DISSOLVE";
+  iOSAnimation[iOSAnimation["COVER_VERTICAL"] = 2] = "COVER_VERTICAL";
+})(exports.iOSAnimation || (exports.iOSAnimation = {}));
+exports.AndroidAnimation = void 0;
+(function(AndroidAnimation) {
+  AndroidAnimation[AndroidAnimation["FADE_IN"] = 0] = "FADE_IN";
+  AndroidAnimation[AndroidAnimation["FADE_OUT"] = 1] = "FADE_OUT";
+  AndroidAnimation[AndroidAnimation["SLIDE_IN_LEFT"] = 2] = "SLIDE_IN_LEFT";
+  AndroidAnimation[AndroidAnimation["SLIDE_OUT_RIGHT"] = 3] = "SLIDE_OUT_RIGHT";
+})(exports.AndroidAnimation || (exports.AndroidAnimation = {}));
+exports.DismissStyle = void 0;
+(function(DismissStyle) {
+  DismissStyle[DismissStyle["CLOSE"] = 0] = "CLOSE";
+  DismissStyle[DismissStyle["CANCEL"] = 1] = "CANCEL";
+  DismissStyle[DismissStyle["DONE"] = 2] = "DONE";
+})(exports.DismissStyle || (exports.DismissStyle = {}));
+exports.CallbackEventType = void 0;
+(function(CallbackEventType) {
+  CallbackEventType[CallbackEventType["SUCCESS"] = 1] = "SUCCESS";
+  CallbackEventType[CallbackEventType["PAGE_CLOSED"] = 2] = "PAGE_CLOSED";
+  CallbackEventType[CallbackEventType["PAGE_LOAD_COMPLETED"] = 3] = "PAGE_LOAD_COMPLETED";
+  CallbackEventType[CallbackEventType["PAGE_NAVIGATED"] = 4] = "PAGE_NAVIGATED";
+})(exports.CallbackEventType || (exports.CallbackEventType = {}));
 const DefaultAndroidWebViewOptions = {
   allowZoom: false,
   hardwareBack: true,
@@ -52,8 +53,8 @@ const DefaultiOSWebViewOptions = {
   enableViewportScale: false,
   allowInLineMediaPlayback: false,
   surpressIncrementalRendering: false,
-  viewStyle: iOSViewStyle.FULL_SCREEN,
-  animationEffect: iOSAnimation.COVER_VERTICAL
+  viewStyle: exports.iOSViewStyle.FULL_SCREEN,
+  animationEffect: exports.iOSAnimation.COVER_VERTICAL
 };
 const DefaultWebViewOptions = {
   showToolbar: true,
@@ -62,7 +63,7 @@ const DefaultWebViewOptions = {
   clearSessionCache: true,
   mediaPlaybackRequiresUserAction: false,
   closeButtonText: "Close",
-  toolbarPosition: ToolbarPosition.TOP,
+  toolbarPosition: exports.ToolbarPosition.TOP,
   showNavigationButtons: true,
   leftToRight: false,
   android: DefaultAndroidWebViewOptions,
@@ -70,37 +71,42 @@ const DefaultWebViewOptions = {
   customWebViewUserAgent: null
 };
 const DefaultiOSSystemBrowserOptions = {
-  closeButtonText: DismissStyle.DONE,
-  viewStyle: iOSViewStyle.FULL_SCREEN,
-  animationEffect: iOSAnimation.COVER_VERTICAL,
+  closeButtonText: exports.DismissStyle.DONE,
+  viewStyle: exports.iOSViewStyle.FULL_SCREEN,
+  animationEffect: exports.iOSAnimation.COVER_VERTICAL,
   enableBarsCollapsing: true,
   enableReadersMode: false
 };
 const DefaultAndroidSystemBrowserOptions = {
   showTitle: false,
   hideToolbarOnScroll: false,
-  viewStyle: AndroidViewStyle.BOTTOM_SHEET,
-  startAnimation: AndroidAnimation.FADE_IN,
-  exitAnimation: AndroidAnimation.FADE_OUT
+  viewStyle: exports.AndroidViewStyle.BOTTOM_SHEET,
+  startAnimation: exports.AndroidAnimation.FADE_IN,
+  exitAnimation: exports.AndroidAnimation.FADE_OUT
 };
 const DefaultSystemBrowserOptions = {
   android: DefaultAndroidSystemBrowserOptions,
   iOS: DefaultiOSSystemBrowserOptions
 };
 var exec = cordova.require("cordova/exec");
-function trigger(type, success, onbrowserClosed = void 0, onbrowserPageLoaded = void 0) {
+function trigger(type, success, data, onbrowserClosed = void 0, onbrowserPageLoaded = void 0, onbrowserNavigated = void 0) {
   switch (type) {
-    case CallbackEvent.SUCCESS:
+    case exports.CallbackEventType.SUCCESS:
       success();
       break;
-    case CallbackEvent.PAGE_CLOSED:
+    case exports.CallbackEventType.PAGE_CLOSED:
       if (onbrowserClosed) {
         onbrowserClosed();
       }
       break;
-    case CallbackEvent.PAGE_LOAD_COMPLETED:
+    case exports.CallbackEventType.PAGE_LOAD_COMPLETED:
       if (onbrowserPageLoaded) {
         onbrowserPageLoaded();
+      }
+      break;
+    case exports.CallbackEventType.PAGE_NAVIGATED:
+      if (onbrowserNavigated) {
+        onbrowserNavigated(data);
       }
       break;
   }
@@ -108,11 +114,12 @@ function trigger(type, success, onbrowserClosed = void 0, onbrowserPageLoaded = 
 function openInWebView(url, options, success, error, browserCallbacks) {
   options = options || DefaultWebViewOptions;
   let triggerCorrectCallback = function(result) {
-    if (result) {
+    const parsedResult = JSON.parse(result);
+    if (parsedResult) {
       if (browserCallbacks) {
-        trigger(result, success, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
+        trigger(parsedResult.eventType, success, parsedResult.data, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded, browserCallbacks.onbrowserNavigated);
       } else {
-        trigger(result, success);
+        trigger(parsedResult.eventType, success, parsedResult.data);
       }
     }
   };
@@ -121,11 +128,12 @@ function openInWebView(url, options, success, error, browserCallbacks) {
 function openInSystemBrowser(url, options, success, error, browserCallbacks) {
   options = options || DefaultSystemBrowserOptions;
   let triggerCorrectCallback = function(result) {
-    if (result) {
+    const parsedResult = JSON.parse(result);
+    if (parsedResult) {
       if (browserCallbacks) {
-        trigger(result, success, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
+        trigger(parsedResult.eventType, success, parsedResult.data, browserCallbacks.onbrowserClosed, browserCallbacks.onbrowserPageLoaded);
       } else {
-        trigger(result, success);
+        trigger(parsedResult.eventType, success);
       }
     }
   };
@@ -143,10 +151,3 @@ module.exports = {
   openInSystemBrowser,
   close
 };
-exports.AndroidAnimation = AndroidAnimation;
-exports.AndroidViewStyle = AndroidViewStyle;
-exports.CallbackEvent = CallbackEvent;
-exports.DismissStyle = DismissStyle;
-exports.ToolbarPosition = ToolbarPosition;
-exports.iOSAnimation = iOSAnimation;
-exports.iOSViewStyle = iOSViewStyle;

@@ -87,9 +87,18 @@ export interface AndroidSystemBrowserOptions {
 export interface BrowserCallbacks {
     onbrowserClosed: () => void;
     onbrowserPageLoaded: () => void;
+    onbrowserNavigated: (data?: CallbackEventData) => void;
 }
-export declare enum CallbackEvent {
+export declare enum CallbackEventType {
     SUCCESS = 1,
     PAGE_CLOSED = 2,
-    PAGE_LOAD_COMPLETED = 3
+    PAGE_LOAD_COMPLETED = 3,
+    PAGE_NAVIGATED = 4
+}
+export interface CallbackEventData {
+    url: string;
+}
+export interface CallbackEvent {
+    eventType: CallbackEventType;
+    data: CallbackEventData;
 }
