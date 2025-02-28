@@ -46,7 +46,8 @@
             </config>
             <pods use-frameworks="true">
                 <!--<pod name="OSInAppBrowserLib" spec="1.0.0" />-->
-                <pod name="OSInAppBrowserLib" spec="1.0.1" git="https://github.com/os-adv-dev/OSInAppBrowserLib-iOS" />
+                <!--<pod name="OSInAppBrowserLib" spec="1.0.1" git="https://raw.githubusercontent.com/os-adv-dev/OSInAppBrowserLib-iOS/main/OSInAppBrowserLib.podspec" />-->
+                <pod name="OSInAppBrowserLib" podspec="https://raw.githubusercontent.com/os-adv-dev/OSInAppBrowserLib-iOS/main/OSInAppBrowserLib.podspec" />
             </pods>
         </podspec> 
     </platform>
