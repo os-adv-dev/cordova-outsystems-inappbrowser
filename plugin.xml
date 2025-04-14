@@ -27,8 +27,6 @@
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
         <source-file src="src/android/OSInAppBrowserSystemBrowserInputArguments.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
         <source-file src="src/android/OSInAppBrowserWebViewInputArguments.kt" target-dir="app/src/main/kotlin/com/outsystems/plugins/inappbrowser/osinappbrowser" />
-
-        <framework src="src/android/libs/ioninappbrowser-android-1.3.0-os-adv-dev.aar" custom="true" />
     </platform>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
